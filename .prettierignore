@@ -1,0 +1,6 @@
+.next/
+
+public/
+
+# lock file
+yarn.lock
