@@ -1,6 +1,18 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { SvgLineExtractor, generateSourceFields, generateTargetFields } from './utils';
-import useTableMapping from './hooks/useTableMapping';
+import { SvgLineExtractor } from './utils';
+import { useMappings, useTargetFields } from './contexts';
+
+import {
+  defaultSourceTableStyle,
+  defaultTargetTableStyle,
+  defaultTableHeaderStyle,
+  defaultTableCellStyle,
+  defaultConnectorStyle,
+} from './style/default-style';
+
+import SourceTable from './components/SourceTable';
+import TargetTable from './components/TargetTable';
+import MappingLines from './components/MappingLines';
 
 function TableMapping({
   sources = [],
@@ -8,40 +20,32 @@ function TableMapping({
   initialMappings = [],
   sourceColumns = [],
   targetColumns = [],
-  lineType = 'step',
+  lineType = 'straight',
   lineColor = '#2196F3',
-  lineWidth = 2,
+  lineWidth = 1.5,
   hoverLineColor = '#ff5722',
-  sourceTableStyle = {},
-  targetTableStyle = {},
-  tableHeaderStyle = {},
-  tableCellStyle = {},
-  connectorStyle = {},
+  sourceTableStyle = defaultSourceTableStyle,
+  targetTableStyle = defaultTargetTableStyle,
+  tableHeaderStyle = defaultTableHeaderStyle,
+  tableCellStyle = defaultTableCellStyle,
+  connectorStyle = defaultConnectorStyle,
   onMappingChange,
 }: TableMappingProps) {
-  const {
-    getSourceFields,
-    getTargetFields,
-    getMappings,
-    sameNameMapping,
-    sameLineMapping,
-    clearMappings,
-    addMapping,
-    removeMapping,
-    updateSourceFields,
-    updateTargetFields,
-    updateMappings,
-  } = useTableMapping();
+  const { mappings, sameNameMapping, sameLineMapping, clearMappings, addMapping, removeMapping, updateMappings } =
+    useMappings();
+
+  const { targetFields } = useTargetFields();
+
   const svgRef = useRef<SVGSVGElement>(null);
 
-  const sourceFields = getSourceFields();
-  const targetFields = getTargetFields();
-  const mappings = getMappings();
-
-  // 현재 호버 중인 매핑 ID
+  /**
+   * hovering mapping id
+   */
   const [hoveredMapping, setHoveredMapping] = useState<string | null>(null);
 
-  // 드래그 관련 상태
+  /**
+   * dragging state
+   */
   const [dragging, setDragging] = useState<{
     active: boolean;
     sourceId: string;
@@ -59,11 +63,6 @@ function TableMapping({
   });
 
   const [tableHeight, setTableHeight] = useState(0);
-  // const [windowSize, setWindowSize] = useState({
-  //   width: window.innerWidth,
-  //   height: window.innerHeight,
-  // });
-
   const [forceUpdate, setForceUpdate] = useState(0);
 
   const updateTableHeight = useCallback(() => {
@@ -78,19 +77,16 @@ function TableMapping({
     }
   }, []);
 
-  const handleResize = useCallback(() => {
-    // setWindowSize({
-    //   width: window.innerWidth,
-    //   height: window.innerHeight,
-    // });
+  const handleResize = () => {
     updateTableHeight();
-
     setForceUpdate((prev) => prev + 1);
-  }, []);
+  };
 
-  // 소스 연결점에서 드래그 시작
+  /**
+   * start dragging from source connector
+   */
   const handleDragStart = (e: React.MouseEvent, sourceId: string) => {
-    // 연결점 위치 계산
+    // calculate connector position
     const sourceEl = document.getElementById(`connector-${sourceId}`);
     if (!sourceEl) return;
 
@@ -99,7 +95,7 @@ function TableMapping({
 
     if (!containerRect) return;
 
-    // 컨테이너를 기준으로 한 상대적 위치 계산
+    // calculate relative position based on container
     const startX = rect.right - containerRect.left;
     const startY = rect.top + rect.height / 2 - containerRect.top;
 
@@ -116,7 +112,9 @@ function TableMapping({
     e.stopPropagation();
   };
 
-  // 드래그 진행 중
+  /**
+   * dragging
+   */
   const handleDrag = (e: React.MouseEvent) => {
     if (!dragging.active) return;
 
@@ -136,7 +134,9 @@ function TableMapping({
     e.stopPropagation();
   };
 
-  // 드래그 종료
+  /**
+   * end dragging
+   */
   const handleDragEnd = (e: React.MouseEvent) => {
     if (!dragging.active) return;
 
@@ -157,7 +157,7 @@ function TableMapping({
       const targetX = rect.left - svgRect.left;
       const targetY = rect.top + rect.height / 2 - svgRect.top;
 
-      // 연결점 위에 마우스가 있는지 확인 (15픽셀 반경 내)
+      // check if mouse is on connector (15px radius)
       const distance = Math.sqrt(Math.pow(currentX - targetX, 2) + Math.pow(currentY - targetY, 2));
 
       if (distance <= 15) {
@@ -179,7 +179,9 @@ function TableMapping({
     e.stopPropagation();
   };
 
-  // 연결선 경로 생성 (선 타입에 따라 다르게 구현)
+  /**
+   * create path based on line type
+   */
   const createPath = useCallback(
     (sourceId: string, targetId: string) => {
       const sourceEl = document.getElementById(`connector-${sourceId}`);
@@ -228,54 +230,29 @@ function TableMapping({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []); // 필드 데이터가 변경될 때도 업데이트
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // when field data is changed, update
 
   useEffect(() => {
-    console.log(sourceFields, targetFields);
-    updateSourceFields(generateSourceFields({ sources }));
-    updateTargetFields(generateTargetFields({ targets }));
     updateMappings(initialMappings);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  console.log(sourceFields, targetFields);
 
   return (
     <div className="react-table-mapping">
       <div className="mapping-container">
-        {/* 소스 테이블 */}
-        <div className="table source-table" style={sourceTableStyle}>
-          <div className="table-header" style={tableHeaderStyle}>
-            {sourceColumns.map((column) => (
-              <div key={column.key} className="header-cell">
-                {column.title}
-              </div>
-            ))}
-          </div>
-          <div className="table-body">
-            {sourceFields.map((field) => {
-              const { id, key, ...rest } = field;
+        {/* source table */}
+        <SourceTable
+          sources={sources}
+          sourceColumns={sourceColumns}
+          sourceTableStyle={sourceTableStyle}
+          tableHeaderStyle={tableHeaderStyle}
+          tableCellStyle={tableCellStyle}
+          connectorStyle={connectorStyle}
+          handleDragStart={handleDragStart}
+        />
 
-              return (
-                <div key={id || key} className="table-row">
-                  {Object.values(rest ?? {}).map((value) => (
-                    <div className="cell" style={tableCellStyle}>
-                      {value}
-                    </div>
-                  ))}
-
-                  <div
-                    id={`connector-${field.id}`}
-                    className="connector source-connector"
-                    style={connectorStyle}
-                    onMouseDown={(e) => handleDragStart(e, field.id)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* SVG 매핑 선 - 리사이즈 시 강제 리렌더링하기 위해 key 속성 추가 */}
+        {/* SVG mapping line - add key property to force re-render when resizing */}
         <svg
           ref={svgRef}
           className="mapping-svg"
@@ -283,56 +260,21 @@ function TableMapping({
           onMouseMove={handleDrag}
           onMouseUp={handleDragEnd}
           onMouseLeave={handleDragEnd}
-          key={`svg-${forceUpdate}`}
         >
-          {/* 매핑 연결선 */}
-          {mappings.map((mapping) => {
-            const pathData = createPath(mapping.source, mapping.target);
-            return pathData ? (
-              <g
-                key={`${mapping.id}-${forceUpdate}`}
-                onMouseEnter={() => setHoveredMapping(mapping.id)}
-                onMouseLeave={() => setHoveredMapping(null)}
-              >
-                {/* 실제 연결선 */}
-                <path
-                  d={pathData.path}
-                  stroke={hoveredMapping === mapping.id ? hoverLineColor : lineColor}
-                  strokeWidth={lineWidth}
-                  fill="none"
-                  markerEnd={`url(#arrowhead-${hoveredMapping === mapping.id ? 'hover' : 'normal'})`}
-                  className="path-line"
-                />
+          {/* mapping line */}
+          <MappingLines
+            mappings={mappings}
+            createPath={(sourceId, targetId) => createPath(sourceId, targetId) ?? { path: '', midX: 0, midY: 0 }}
+            lineColor={lineColor}
+            lineWidth={lineWidth}
+            hoverLineColor={hoverLineColor}
+            removeMapping={removeMapping}
+            forceUpdate={forceUpdate}
+            hoveredMapping={hoveredMapping}
+            setHoveredMapping={setHoveredMapping}
+          />
 
-                {/* 선 위에 마우스를 올렸을 때 더 넓은 영역의 투명한 선 (클릭/호버 감지용) */}
-                <path
-                  d={pathData.path}
-                  stroke="transparent"
-                  strokeWidth="20"
-                  fill="none"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => removeMapping(mapping.id)}
-                />
-
-                {/* 중앙 삭제 버튼 - 호버 시에만 표시 */}
-                {hoveredMapping === mapping.id && (
-                  <foreignObject
-                    width="24"
-                    height="24"
-                    x={pathData.midX - 12}
-                    y={pathData.midY - 12}
-                    style={{ overflow: 'visible' }}
-                  >
-                    <svg xmlns="http://www.w3.org/1999/xhtml" className="delete-btn-circle">
-                      ✕
-                    </svg>
-                  </foreignObject>
-                )}
-              </g>
-            ) : null;
-          })}
-
-          {/* 드래그 중인 선 */}
+          {/* dragging line */}
           {dragging.active && (
             <path
               d={
@@ -349,49 +291,50 @@ function TableMapping({
             />
           )}
 
-          {/* 화살표 마커 정의 */}
+          {/* define arrow marker */}
           <defs>
-            <marker id="arrowhead-normal" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill={lineColor} />
+            {/* normal arrow */}
+            <marker
+              id="arrowhead-normal"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="4"
+              markerHeight="4"
+              orient="auto"
+            >
+              <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={lineColor || '#3b82f6'} strokeWidth="1.5" />
             </marker>
-            <marker id="arrowhead-hover" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill={hoverLineColor} />
+
+            {/* hover arrow */}
+            <marker
+              id="arrowhead-hover"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="4"
+              markerHeight="4"
+              orient="auto"
+            >
+              <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={hoverLineColor || '#60a5fa'} strokeWidth="1.5" />
             </marker>
           </defs>
         </svg>
 
-        {/* 타겟 테이블 */}
-        <div className="table target-table" style={targetTableStyle}>
-          <div className="table-header" style={tableHeaderStyle}>
-            {targetColumns.map((column) => (
-              <div key={column.key} className="header-cell">
-                {column.title}
-              </div>
-            ))}
-          </div>
-          <div className="table-body">
-            {targetFields.map((field) => {
-              const { id, key, ...rest } = field;
-
-              return (
-                <div key={id || key} className="table-row">
-                  {Object.values(rest ?? {}).map((value) => (
-                    <div className="cell" style={tableCellStyle}>
-                      {value}
-                    </div>
-                  ))}
-
-                  <div id={`connector-${field.id}`} className="connector target-connector" style={connectorStyle}></div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* target table */}
+        <TargetTable
+          targets={targets}
+          targetColumns={targetColumns}
+          targetTableStyle={targetTableStyle}
+          tableHeaderStyle={tableHeaderStyle}
+          tableCellStyle={tableCellStyle}
+          connectorStyle={connectorStyle}
+        />
       </div>
 
       <div className="button-container">
         <button onClick={sameLineMapping}>같은 행 연결하기</button>
-        <button onClick={sameNameMapping}>같은 이름 연결하기</button>
+        <button onClick={() => sameNameMapping('name')}>같은 이름 연결하기</button>
         <button onClick={clearMappings}>연결 취소하기</button>
       </div>
     </div>

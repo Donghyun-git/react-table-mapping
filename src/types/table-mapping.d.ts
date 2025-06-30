@@ -8,25 +8,70 @@ type LineType = 'bezier' | 'straight' | 'step';
  * source column type
  */
 interface HeaderColumnProps {
+  /**
+   * column title
+   */
   title: string;
+
+  /**
+   * column key
+   * - matched with `FieldItem.key`
+   * - if you want to match with `FieldItem.key`, use `key` props.
+   * - can use `sameNameMapping` methods in `useTableMapping` hook.
+   */
   key: string;
+}
+
+/**
+ * other field data
+ * - you can custom field component init.
+ * - if you want to match with `HeaderColumnProps.key`, use `columnKey` props.
+ *
+ * `column key`
+ * - matched with `FieldItem.key`
+ * - if you want to match with `FieldItem.key`, use `key` props.
+ * - can use `sameNameMapping` methods in `useTableMapping` hook.
+ */
+interface OuterFieldItem {
+  [field: string]:
+    | {
+        type: 'string';
+        columnKey: string;
+        value: string;
+      }
+    | {
+        type: 'input';
+        columnKey: string;
+        value?: string;
+        defaultValue?: string;
+        attributes?: React.InputHTMLAttributes<HTMLInputElement>;
+        onChange?: (value: string) => void;
+      }
+    | {
+        type: 'select';
+        columnKey: string;
+        value?: string;
+        defaultValue?: string;
+        attributes?: React.SelectHTMLAttributes<HTMLSelectElement>;
+        options: {
+          label: string;
+          value: string;
+          disabled?: boolean;
+        }[];
+        onChange?: (value: string) => void;
+      };
 }
 
 /**
  * field item type for `source` and `target`
  */
-interface FieldItem {
+interface FieldItem extends Partial<OuterFieldItem> {
   /**
    * field array item key value
    * - `source`: `source-${randomID}`
    * - `target`: `target-${randomID}`
    */
   id: string;
-
-  /**
-   * field name
-   */
-  name: string;
 
   /**
    * key
@@ -102,7 +147,7 @@ interface TableMappingProps {
 
   /**
    * mapping line width
-   * - default value is `2`
+   * - default value is `1.5`
    */
   lineWidth?: number;
 

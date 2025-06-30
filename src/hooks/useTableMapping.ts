@@ -6,6 +6,9 @@ const useTableMapping = () => {
   const [targetFields, setTargetFields] = useState<FieldItem[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
+  console.log(sourceFields, 'sourceFields');
+  console.log(targetFields, 'targetFields');
+
   /**
    * you can get current source fields.
    */
@@ -26,7 +29,7 @@ const useTableMapping = () => {
    * @param source
    */
   const appendSource = useCallback((source: FieldItem) => {
-    setSourceFields((prev) => [...prev, { ...source, id: `source-${uuidv4()}` }]);
+    setSourceFields((prev) => [...prev, { ...source, id: `source-${uuidv4()}` } as FieldItem]);
   }, []);
 
   /**
@@ -34,7 +37,7 @@ const useTableMapping = () => {
    * @param target
    */
   const appendTarget = useCallback((target: FieldItem) => {
-    setTargetFields((prev) => [...prev, { ...target, id: `target-${uuidv4()}` }]);
+    setTargetFields((prev) => [...prev, { ...target, id: `target-${uuidv4()}` } as FieldItem]);
   }, []);
 
   /**
@@ -67,23 +70,30 @@ const useTableMapping = () => {
    * }
    * ```
    */
-  const sameNameMapping = useCallback(() => {
-    const sameNameMappings: Mapping[] = [];
+  const sameNameMapping = useCallback(
+    (name: string) => {
+      const sameNameMappings: Mapping[] = [];
 
-    sourceFields.forEach((source) => {
-      targetFields.forEach((target) => {
-        if (source.name === target.name) {
-          sameNameMappings.push({
-            id: `mapping-${source.id}-${target.id}`,
-            source: source.id,
-            target: target.id,
-          });
-        }
+      sourceFields.forEach((source) => {
+        targetFields.forEach((target) => {
+          if (source[name]?.columnKey && target[name]?.columnKey) {
+            if (source[name]?.value === target[name]?.value) {
+              sameNameMappings.push({
+                id: `mapping-${source.id}-${target.id}`,
+                source: source.id,
+                target: target.id,
+              });
+            }
+          } else {
+            throw new Error('columnKey is required');
+          }
+        });
       });
-    });
 
-    setMappings(sameNameMappings);
-  }, [sourceFields, targetFields]);
+      setMappings(sameNameMappings);
+    },
+    [sourceFields, targetFields],
+  );
 
   /**
    * you can mapping same line.
@@ -162,7 +172,6 @@ const useTableMapping = () => {
    */
   const updateSourceFields = useCallback((newSourceFields: FieldItem[]) => {
     setSourceFields(newSourceFields);
-    // 소스 필드가 변경되면 관련 매핑도 정리
   }, []);
 
   /**
@@ -172,6 +181,40 @@ const useTableMapping = () => {
   const updateTargetFields = useCallback((newTargetFields: FieldItem[]) => {
     setTargetFields(newTargetFields);
     // 타겟 필드가 변경되면 관련 매핑도 정리
+  }, []);
+
+  const updateSourceFieldValue = useCallback((sourceId: string, fieldKey: string, newValue: string) => {
+    setSourceFields((prev) =>
+      prev.map((field) =>
+        field.id === sourceId &&
+        (field[fieldKey]?.type === 'string' || field[fieldKey]?.type === 'input' || field[fieldKey]?.type === 'select')
+          ? {
+              ...field,
+              [fieldKey]: {
+                ...field[fieldKey],
+                value: newValue,
+              },
+            }
+          : field,
+      ),
+    );
+  }, []);
+
+  const updateTargetFieldValue = useCallback((targetId: string, fieldKey: string, newValue: string) => {
+    setTargetFields((prev) =>
+      prev.map((field) =>
+        field.id === targetId &&
+        (field[fieldKey]?.type === 'string' || field[fieldKey]?.type === 'input' || field[fieldKey]?.type === 'select')
+          ? {
+              ...field,
+              [fieldKey]: {
+                ...field[fieldKey],
+                value: newValue,
+              },
+            }
+          : field,
+      ),
+    );
   }, []);
 
   return {
@@ -272,6 +315,24 @@ const useTableMapping = () => {
      * @param newTargetFields
      */
     updateTargetFields,
+
+    /**
+     * you can update source field value
+     * - when you use `input` or `select` type, you can update value.
+     * @param sourceId
+     * @param fieldKey
+     * @param newValue
+     */
+    updateSourceFieldValue,
+
+    /**
+     * you can update target field value
+     * - when you use `input` or `select` type, you can update value.
+     * @param targetId
+     * @param fieldKey
+     * @param newValue
+     */
+    updateTargetFieldValue,
   };
 };
 export default useTableMapping;

@@ -21,7 +21,7 @@ const SvgLineExtractor = ({
     }
 
     case 'straight':
-      return `M ${startX} ${startY} L ${endX} ${endY}`;
+      return `M ${startX} ${startY} L ${endX - 7} ${endY}`;
 
     case 'step': {
       const midX = startX + (endX - startX) / 2;
@@ -30,7 +30,7 @@ const SvgLineExtractor = ({
     }
 
     default:
-      return `M ${startX} ${startY} L ${endX} ${endY}`;
+      return `M ${startX} ${startY} L ${endX - 7} ${endY}`;
   }
 };
 
