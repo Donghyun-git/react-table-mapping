@@ -18,7 +18,7 @@ interface EditableCellProps {
         defaultValue?: string;
         value?: string;
         columnKey: string;
-        attributes?: React.InputHTMLAttributes<HTMLInputElement>;
+        attributes?: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>;
         onChange?: (value: string) => void;
       }
     | {
@@ -26,7 +26,7 @@ interface EditableCellProps {
         defaultValue?: string;
         value?: string;
         columnKey: string;
-        attributes?: React.SelectHTMLAttributes<HTMLSelectElement>;
+        attributes?: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'>;
         options: {
           label: string;
           value: string;
@@ -91,12 +91,19 @@ const EditableCell = memo(({ fieldId, fieldKey, params, cellStyle }: EditableCel
     [fieldId, params, updateSourceFieldValue],
   );
 
-  // 변경 핸들러
+  /**
+   * handle change event target value
+   * - field type is `input` or `select`
+   */
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
       const newValue = e.target.value;
       setLocalValue(newValue);
       debouncedUpdate(newValue);
+
+      if (params.type === 'input' || params.type === 'select') {
+        params.onChange?.(newValue);
+      }
     },
     [debouncedUpdate, fieldId, fieldKey],
   );

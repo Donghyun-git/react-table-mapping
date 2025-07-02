@@ -43,12 +43,10 @@ function App() {
       type: {
         type: 'input',
         columnKey: 'type',
-        attributes: {
-          onChange: (e) => {
-            console.log('input component value', e.target.value);
-          },
-        },
         defaultValue: 'source',
+        onChange: (value) => {
+          console.log('input component value', value);
+        },
       },
       description: {
         type: 'string',

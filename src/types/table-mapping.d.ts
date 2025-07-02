@@ -44,7 +44,7 @@ interface OuterFieldItem {
         columnKey: string;
         value?: string;
         defaultValue?: string;
-        attributes?: React.InputHTMLAttributes<HTMLInputElement>;
+        attributes?: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>;
         onChange?: (value: string) => void;
       }
     | {
@@ -52,7 +52,7 @@ interface OuterFieldItem {
         columnKey: string;
         value?: string;
         defaultValue?: string;
-        attributes?: React.SelectHTMLAttributes<HTMLSelectElement>;
+        attributes?: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'>;
         options: {
           label: string;
           value: string;
