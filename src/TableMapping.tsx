@@ -217,9 +217,7 @@ function TableMapping({
   );
 
   useEffect(() => {
-    if (onMappingChange) {
-      onMappingChange(mappings);
-    }
+    onMappingChange?.(mappings);
   }, [mappings, onMappingChange]);
 
   useEffect(() => {
@@ -334,7 +332,7 @@ function TableMapping({
 
       <div className="button-container">
         <button onClick={sameLineMapping}>같은 행 연결하기</button>
-        <button onClick={() => sameNameMapping('name')}>같은 이름 연결하기</button>
+        <button onClick={() => sameNameMapping('type')}>같은 이름 연결하기</button>
         <button onClick={clearMappings}>연결 취소하기</button>
       </div>
     </div>

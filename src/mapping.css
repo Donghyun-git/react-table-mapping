@@ -98,7 +98,7 @@
   min-height: 200px;
   position: absolute;
   top: 0;
-  left: 0;
+  left: -4px;
   right: 0;
 }
 
