@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.husky/_
+
+*storybook.log
+storybook-static

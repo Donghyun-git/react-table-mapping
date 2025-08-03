@@ -1,59 +1,42 @@
-import React, { useState, useEffect, memo } from 'react';
-import { useSourceFields } from '../contexts';
-import { generateSourceFields } from '../utils';
-import EditableCell from './EditableCell';
+import React, { memo, useEffect, useState } from 'react';
+
+import EditableCell from '@/components/EditableCell';
+import { useSourceFields } from '@/contexts';
+import { generateSourceFields } from '@/utils';
 
 interface SourceTableProps {
   sources: FieldItemInput[];
   sourceColumns: Array<Omit<HeaderColumnProps, 'type'>>;
-  sourceTableStyle: React.CSSProperties;
-  tableHeaderStyle: React.CSSProperties;
-  tableCellStyle: React.CSSProperties;
-  connectorStyle: React.CSSProperties;
   handleDragStart: (e: React.MouseEvent, sourceId: string) => void;
 }
 
 /**
- * row component - memoization
+ * source row component
  */
 const SourceRow = memo(
   ({
     field,
-    tableCellStyle,
-    connectorStyle,
     handleDragStart,
   }: {
     field: FieldItem;
-    tableCellStyle: React.CSSProperties;
-    connectorStyle: React.CSSProperties;
     handleDragStart: (e: React.MouseEvent, sourceId: string) => void;
   }) => {
     const { id, key, ...rest } = field;
 
     return (
-      <div key={id || key} className="table-row">
-        {Object.entries(rest ?? {}).map(([fieldKey, params], index) => {
+      <div
+        key={id || key}
+        className="flex border-b border-b-[var(--color-border-default)] relative h-[50px] items-center hover:bg-[var(--color-bg-mapping-primary-hover)]/20"
+      >
+        {Object.entries(rest ?? {}).map(([fieldKey, params]) => {
           if (params) {
-            return (
-              <EditableCell
-                key={`${id}-${fieldKey}`}
-                fieldId={id}
-                fieldKey={fieldKey}
-                params={params}
-                cellStyle={{
-                  ...tableCellStyle,
-                  paddingRight: index === Object.entries(rest ?? {}).length - 1 ? '24px' : '12px',
-                }}
-              />
-            );
+            return <EditableCell key={`${id}-${fieldKey}`} fieldId={id} fieldKey={fieldKey} params={params} />;
           }
           return null;
         })}
-
         <div
           id={`connector-${id}`}
-          className="connector source-connector"
-          style={connectorStyle}
+          className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--color-icon-primary)] border-2 border-[var(--color-bg-mapping-primary)] z-[9999] cursor-pointer shadow-[var(--shadow-sm)] transition-all duration-200 hover:scale-110 hover:bg-[var(--color-icon-info)]"
           onMouseDown={(e) => handleDragStart(e, id)}
         />
       </div>
@@ -64,15 +47,7 @@ const SourceRow = memo(
 /**
  * main source table component
  */
-const SourceTable = ({
-  sources,
-  sourceColumns,
-  sourceTableStyle,
-  tableHeaderStyle,
-  tableCellStyle,
-  connectorStyle,
-  handleDragStart,
-}: SourceTableProps) => {
+const SourceTable = ({ sources, sourceColumns, handleDragStart }: SourceTableProps) => {
   const [sourceFieldState, setSourceFieldState] = useState<FieldItem[]>([]);
   const { updateSourceFields } = useSourceFields();
 
@@ -81,28 +56,23 @@ const SourceTable = ({
    */
   useEffect(() => {
     const initialFields = generateSourceFields({ sources });
+
     updateSourceFields(initialFields);
     setSourceFieldState(initialFields);
   }, [sources, updateSourceFields]);
 
   return (
-    <div className="table source-table" style={sourceTableStyle}>
-      <div className="table-header" style={tableHeaderStyle}>
+    <div className="source-table min-w-[300px] max-w-[600px] bg-[var(--color-bg-mapping-primary)] rounded-lg shadow-[var(--shadow-sm)] z-10 mr-12">
+      <div className="flex bg-[var(--color-bg-mapping-secondary)] border-b border-b-[var(--color-border-default)] rounded-t-lg">
         {sourceColumns.map((column) => (
-          <div key={column.key} className="header-cell">
+          <span key={column.key} className="p-3 font-medium flex-1 text-center text-[var(--color-text-default)]">
             {column.title}
-          </div>
+          </span>
         ))}
       </div>
-      <div className="table-body">
+      <div className="min-h-[300px]">
         {sourceFieldState.map((field) => (
-          <SourceRow
-            key={field.id || field.key}
-            field={field}
-            tableCellStyle={tableCellStyle}
-            connectorStyle={connectorStyle}
-            handleDragStart={handleDragStart}
-          />
+          <SourceRow key={field.id || field.key} field={field} handleDragStart={handleDragStart} />
         ))}
       </div>
     </div>

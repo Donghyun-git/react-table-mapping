@@ -1,171 +1,187 @@
-import TableMapping from './TableMapping';
-import { TableMappingProvider } from './contexts';
+import TableMapping from '@/components/TableMapping';
+import { TableMappingProvider } from '@/contexts';
 
 function App() {
-  const sourceColumns = [
-    { title: '이름', key: 'name' },
-    { title: '타입', key: 'type' },
-    { title: '설명', key: 'description' },
-    { title: '작업', key: 'action' },
-  ];
+  const sourceColumns = [{ title: 'Name', key: 'name' }];
 
   const targetColumns = [
-    { title: '이름', key: 'name' },
-    { title: '타입', key: 'type' },
+    { title: 'Name', key: 'name' },
+    { title: 'Data', key: 'data' },
+    { title: 'Function', key: 'func' },
   ];
 
   const sourceFields = [
     {
       name: {
-        type: 'select',
+        type: 'string',
         columnKey: 'name',
-        attributes: {
-          style: {
-            backgroundColor: 'white',
-            color: 'black',
-          },
-        },
-        options: [
-          {
-            label: '원본 필드 1',
-            value: '원본 필드 1',
-          },
-          {
-            label: '원본 필드 2',
-            value: '원본 필드 2',
-          },
-          {
-            label: '원본 필드 3',
-            value: '원본 필드 3',
-          },
-        ],
+        value: 'KEY',
       },
-      type: {
-        type: 'input',
-        columnKey: 'type',
-        defaultValue: 'source',
-        onChange: (value) => {
-          console.log('input component value', value);
-        },
-      },
-      description: {
-        type: 'string',
-        columnKey: 'description',
-        value: '원본 필드 1 설명',
-      },
-      action: {
-        type: 'string',
-        columnKey: 'action',
-        value: '원본 필드 1 작업',
-      },
+      id: 'source-0',
+      key: 'source-0',
     },
     {
       name: {
         type: 'string',
         columnKey: 'name',
-        value: '원본 필드 2',
+        value: 'COL1',
       },
-      type: {
-        type: 'string',
-        columnKey: 'type',
-        value: 'source',
-      },
-      description: {
-        type: 'string',
-        columnKey: 'description',
-        value: '원본 필드 2 설명',
-      },
-      action: {
-        type: 'string',
-        columnKey: 'action',
-        value: '원본 필드 2 작업',
-      },
+      id: 'source-1',
+      key: 'source-1',
     },
     {
       name: {
         type: 'string',
         columnKey: 'name',
-        value: '원본 필드 3',
+        value: 'COL2',
       },
-      type: {
+      id: 'source-2',
+      key: 'source-2',
+    },
+    {
+      name: {
         type: 'string',
-        columnKey: 'type',
-        value: 'source',
+        columnKey: 'name',
+        value: 'COL3',
       },
-      description: {
+      id: 'source-3',
+      key: 'source-3',
+    },
+    {
+      name: {
         type: 'string',
-        columnKey: 'description',
-        value: '원본 필드 3 설명',
+        columnKey: 'name',
+        value: 'COL4',
       },
-      action: {
-        type: 'string',
-        columnKey: 'action',
-        value: '원본 필드 3 작업',
-      },
+      id: 'source-4',
+      key: 'source-4',
     },
   ] satisfies FieldItemInput[];
 
   const targetFields = [
     {
+      id: 'target-0',
+      key: 'target-0',
       name: {
-        type: 'select',
+        type: 'input',
         columnKey: 'name',
-        attributes: {
-          style: {
-            backgroundColor: 'white',
-            color: 'black',
-          },
-        },
-        options: [
-          {
-            label: '원본 필드 1',
-            value: '원본 필드 1',
-          },
-          {
-            label: '원본 필드 2',
-            value: '원본 필드 2',
-          },
-          {
-            label: '원본 필드 3',
-            value: '원본 필드 3',
-          },
-        ],
-        onChange: (value) => {
-          console.log('select component value', value);
-        },
+        value: 'KEY',
+        onChange: (value) => console.log('target name changed:', value),
       },
-      type: {
-        type: 'string',
-        columnKey: 'type',
-        value: 'target',
+      data: {
+        type: 'input',
+        columnKey: 'data',
+        value: '',
+        onChange: (value) => console.log('target data changed:', value),
+      },
+      func: {
+        type: 'select',
+        columnKey: 'func',
+        value: 'NONE',
+        options: [
+          { label: 'NONE', value: 'NONE' },
+          { label: 'CONCAT', value: 'CONCAT' },
+          { label: 'SUM', value: 'SUM' },
+        ],
+        onChange: (value) => console.log('target func changed:', value),
       },
     },
     {
+      id: 'target-1',
+      key: 'target-1',
       name: {
-        type: 'string',
+        type: 'input',
         columnKey: 'name',
-        value: '원본 필드 1',
+        value: 'CONCAT_COL',
+        onChange: (value) => console.log('target name changed:', value),
       },
-      type: {
-        type: 'string',
-        columnKey: 'type',
-        value: 'target',
+      data: {
+        type: 'input',
+        columnKey: 'data',
+        value: 'CONCAT(COL1,COL2)',
+        onChange: (value) => console.log('target data changed:', value),
+      },
+      func: {
+        type: 'select',
+        columnKey: 'func',
+        value: 'CONCAT',
+        options: [
+          { label: 'NONE', value: 'NONE' },
+          { label: 'CONCAT', value: 'CONCAT' },
+          { label: 'SUM', value: 'SUM' },
+        ],
+        onChange: (value) => console.log('target func changed:', value),
+      },
+    },
+    {
+      id: 'target-2',
+      key: 'target-2',
+      name: {
+        type: 'input',
+        columnKey: 'name',
+        value: 'SUM_COL',
+        onChange: (value) => console.log('target name changed:', value),
+      },
+      data: {
+        type: 'input',
+        columnKey: 'data',
+        value: 'SUM(,)',
+        onChange: (value) => console.log('target data changed:', value),
+      },
+      func: {
+        type: 'select',
+        columnKey: 'func',
+        value: 'SUM',
+        options: [
+          { label: 'NONE', value: 'NONE' },
+          { label: 'CONCAT', value: 'CONCAT' },
+          { label: 'SUM', value: 'SUM' },
+        ],
+        onChange: (value) => console.log('target func changed:', value),
       },
     },
   ] satisfies FieldItemInput[];
 
+  const initialMappings = [
+    {
+      id: 'mapping-source-0-target-0',
+      source: 'source-0',
+      target: 'target-0',
+    },
+    {
+      id: 'mapping-source-1-target-1',
+      source: 'source-1',
+      target: 'target-1',
+    },
+    {
+      id: 'mapping-source-2-target-1',
+      source: 'source-2',
+      target: 'target-1',
+    },
+    {
+      id: 'mapping-source-3-target-2',
+      source: 'source-3',
+      target: 'target-2',
+    },
+    {
+      id: 'mapping-source-4-target-2',
+      source: 'source-4',
+      target: 'target-2',
+    },
+  ];
+
   return (
     <TableMappingProvider>
-      <TableMapping
-        lineType="bezier"
-        sourceColumns={sourceColumns}
-        targetColumns={targetColumns}
-        sources={sourceFields}
-        targets={targetFields}
-        onMappingChange={(mappings) => {
-          console.log('currentMappings => ', mappings);
-        }}
-      />
+      <div className="h-[400px]">
+        <TableMapping
+          lineType="bezier"
+          sources={sourceFields}
+          targets={targetFields}
+          sourceColumns={sourceColumns}
+          targetColumns={targetColumns}
+          initialMappings={initialMappings}
+        />
+      </div>
     </TableMappingProvider>
   );
 }

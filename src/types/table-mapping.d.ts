@@ -59,7 +59,8 @@ interface OuterFieldItem {
           disabled?: boolean;
         }[];
         onChange?: (value: string) => void;
-      };
+      }
+    | string;
 }
 
 /**
@@ -104,7 +105,7 @@ interface Mapping {
 /**
  * field item without internal properties (for user input)
  */
-type FieldItemInput = Omit<FieldItem, 'id' | 'key'>;
+type FieldItemInput = Partial<FieldItem>;
 
 interface TableMappingProps {
   /**
@@ -181,6 +182,20 @@ interface TableMappingProps {
    * you can custom `connector` style.
    */
   connectorStyle?: React.CSSProperties;
+
+  /**
+   * you can custom `container` style.
+   */
+  containerMinHeight?: number;
+
+  /**
+   * you can custom `container` height.
+   */
+  containerHeight?: number;
+
+  /**
+   * you can custom `container` min height.
+   */
 
   /**
    * if mapping, `onMappingChange` return current Mapping states.

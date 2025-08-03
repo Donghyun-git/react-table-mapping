@@ -1,18 +1,11 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { SvgLineExtractor } from './utils';
-import { useMappings, useTargetFields } from './contexts';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  defaultSourceTableStyle,
-  defaultTargetTableStyle,
-  defaultTableHeaderStyle,
-  defaultTableCellStyle,
-  defaultConnectorStyle,
-} from './style/default-style';
-
-import SourceTable from './components/SourceTable';
-import TargetTable from './components/TargetTable';
-import MappingLines from './components/MappingLines';
+import MappingLines from '@/components/MappingLines';
+import SourceTable from '@/components/SourceTable';
+import TargetTable from '@/components/TargetTable';
+import { Button } from '@/components/ui/button';
+import { useMappings, useTargetFields } from '@/contexts';
+import { SvgLineExtractor } from '@/utils';
 
 function TableMapping({
   sources = [],
@@ -21,14 +14,11 @@ function TableMapping({
   sourceColumns = [],
   targetColumns = [],
   lineType = 'straight',
-  lineColor = '#2196F3',
+  lineColor = '#009bff',
   lineWidth = 1.5,
-  hoverLineColor = '#ff5722',
-  sourceTableStyle = defaultSourceTableStyle,
-  targetTableStyle = defaultTargetTableStyle,
-  tableHeaderStyle = defaultTableHeaderStyle,
-  tableCellStyle = defaultTableCellStyle,
-  connectorStyle = defaultConnectorStyle,
+  containerMinHeight = 400,
+  containerHeight = 400,
+  hoverLineColor = '#e3f3ff',
   onMappingChange,
 }: TableMappingProps) {
   const { mappings, sameNameMapping, sameLineMapping, clearMappings, addMapping, removeMapping, updateMappings } =
@@ -62,23 +52,9 @@ function TableMapping({
     currentY: 0,
   });
 
-  const [tableHeight, setTableHeight] = useState(0);
   const [forceUpdate, setForceUpdate] = useState(0);
 
-  const updateTableHeight = useCallback(() => {
-    const sourceTable = document.querySelector('.source-table');
-    const targetTable = document.querySelector('.target-table');
-
-    if (sourceTable && targetTable) {
-      const sourceHeight = sourceTable.getBoundingClientRect().height;
-      const targetHeight = targetTable.getBoundingClientRect().height;
-      const maxHeight = Math.max(sourceHeight, targetHeight);
-      setTableHeight(maxHeight);
-    }
-  }, []);
-
   const handleResize = () => {
-    updateTableHeight();
     setForceUpdate((prev) => prev + 1);
   };
 
@@ -161,11 +137,9 @@ function TableMapping({
       const distance = Math.sqrt(Math.pow(currentX - targetX, 2) + Math.pow(currentY - targetY, 2));
 
       if (distance <= 15) {
-        // 이미 존재하는 매핑인지 확인
         const existingMapping = mappings.find((m) => m.source === dragging.sourceId && m.target === targetField.id);
 
         if (!existingMapping) {
-          // 새 매핑 추가
           addMapping(dragging.sourceId, targetField.id);
         }
 
@@ -217,44 +191,52 @@ function TableMapping({
   );
 
   useEffect(() => {
-    onMappingChange?.(mappings);
+    if (onMappingChange) {
+      onMappingChange(mappings);
+    }
   }, [mappings, onMappingChange]);
 
   useEffect(() => {
-    updateTableHeight();
-
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // when field data is changed, update
-
-  useEffect(() => {
-    updateMappings(initialMappings);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * initial mappings
+   */
+  useEffect(() => {
+    if (initialMappings.length > 0) {
+      const renderTimer = setTimeout(() => {
+        updateMappings(initialMappings);
+
+        setForceUpdate((prev) => prev + 1);
+      }, 100);
+
+      return () => clearTimeout(renderTimer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMappings]);
+
   return (
-    <div className="react-table-mapping">
-      <div className="mapping-container">
+    <div className="react-table-mapping p-5 w-full h-full">
+      <div
+        className="mapping-container relative flex justify-between h-full rounded-sm bg-[var(--color-bg-mapping-primary)] overflow-auto"
+        style={{
+          height: `${containerHeight}px`,
+          minHeight: `${containerMinHeight}px`,
+        }}
+      >
         {/* source table */}
-        <SourceTable
-          sources={sources}
-          sourceColumns={sourceColumns}
-          sourceTableStyle={sourceTableStyle}
-          tableHeaderStyle={tableHeaderStyle}
-          tableCellStyle={tableCellStyle}
-          connectorStyle={connectorStyle}
-          handleDragStart={handleDragStart}
-        />
+        <SourceTable sources={sources} sourceColumns={sourceColumns} handleDragStart={handleDragStart} />
 
         {/* SVG mapping line - add key property to force re-render when resizing */}
         <svg
           ref={svgRef}
-          className="mapping-svg"
-          style={{ height: `${tableHeight}px` }}
+          className="mapping-svg flex-1 w-full  absolute top-0 left-0 right-0"
+          style={{ height: `${containerHeight}px`, minHeight: `${containerMinHeight}px` }}
           onMouseMove={handleDrag}
           onMouseUp={handleDragEnd}
           onMouseLeave={handleDragEnd}
@@ -320,20 +302,13 @@ function TableMapping({
         </svg>
 
         {/* target table */}
-        <TargetTable
-          targets={targets}
-          targetColumns={targetColumns}
-          targetTableStyle={targetTableStyle}
-          tableHeaderStyle={tableHeaderStyle}
-          tableCellStyle={tableCellStyle}
-          connectorStyle={connectorStyle}
-        />
+        <TargetTable targets={targets} targetColumns={targetColumns} />
       </div>
 
-      <div className="button-container">
-        <button onClick={sameLineMapping}>같은 행 연결하기</button>
-        <button onClick={() => sameNameMapping('type')}>같은 이름 연결하기</button>
-        <button onClick={clearMappings}>연결 취소하기</button>
+      <div className="flex gap-2 items-center justify-center mt-5">
+        <Button onClick={sameLineMapping}>Same Line Mapping</Button>
+        <Button onClick={() => sameNameMapping('name')}>Same Name Mapping [ target filed : Name]</Button>
+        <Button onClick={clearMappings}>Clear Mapping</Button>
       </div>
     </div>
   );

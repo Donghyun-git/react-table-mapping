@@ -1,10 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
-import { useSourceFields, useTargetFields } from '../contexts';
-
 import { debounce } from 'es-toolkit';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
-interface EditableCellProps {
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSourceFields, useTargetFields } from '@/contexts';
+
+export interface EditableCellProps {
   fieldId: string;
   fieldKey: string;
   params:
@@ -33,12 +35,14 @@ interface EditableCellProps {
           disabled?: boolean;
         }[];
         onChange?: (value: string) => void;
-      };
-  cellStyle: React.CSSProperties;
+      }
+    | string;
 }
 
-const EditableCell = memo(({ fieldId, fieldKey, params, cellStyle }: EditableCellProps) => {
+const EditableCell = memo(({ fieldId, fieldKey, params }: EditableCellProps) => {
   const [localValue, setLocalValue] = useState(() => {
+    if (typeof params === 'string') return params;
+
     if (params.type === 'input' || params.type === 'select') {
       return params.defaultValue || params.value || '';
     }
@@ -50,6 +54,8 @@ const EditableCell = memo(({ fieldId, fieldKey, params, cellStyle }: EditableCel
   const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
 
   useEffect(() => {
+    if (typeof params === 'string') return;
+
     if (params.type === 'select') {
       setLocalValue(inputRef.current?.value || '');
 
@@ -64,6 +70,8 @@ const EditableCell = memo(({ fieldId, fieldKey, params, cellStyle }: EditableCel
   }, []);
 
   useEffect(() => {
+    if (typeof params === 'string') return;
+
     if (params.type === 'input' || params.type === 'select') {
       if (params.value !== localValue && document.activeElement !== inputRef.current) {
         setLocalValue(params.defaultValue || params.value || '');
@@ -73,10 +81,12 @@ const EditableCell = memo(({ fieldId, fieldKey, params, cellStyle }: EditableCel
         setLocalValue(params.value || '');
       }
     }
-  }, [params.value]);
+  }, [params]);
 
   const debouncedUpdate = useCallback(
     debounce((value: string) => {
+      if (typeof params === 'string') return;
+
       if (params.type === 'input' || params.type === 'select') {
         if (params.columnKey) {
           if (fieldId.includes('source')) {
@@ -95,34 +105,48 @@ const EditableCell = memo(({ fieldId, fieldKey, params, cellStyle }: EditableCel
    * handle change event target value
    * - field type is `input` or `select`
    */
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
+
       setLocalValue(newValue);
       debouncedUpdate(newValue);
 
-      if (params.type === 'input' || params.type === 'select') {
+      if (typeof params === 'string') return;
+
+      if (params.type === 'input') {
         params.onChange?.(newValue);
       }
     },
     [debouncedUpdate, fieldId, fieldKey],
   );
 
+  const handleSelectChange = useCallback(
+    (value: string) => {
+      setLocalValue(value);
+      debouncedUpdate(value);
+
+      if (typeof params === 'string') return;
+
+      if (params.type === 'select') {
+        params.onChange?.(value);
+      }
+    },
+    [debouncedUpdate, fieldId, fieldKey],
+  );
+
+  if (typeof params === 'string') {
+    return <div className="p-3 flex-1 custom-cell-text text-sm text-[var(--color-text-default)]">{params}</div>;
+  }
+
   if (params.type === 'input') {
     return (
-      <div className="cell custom-cell" style={cellStyle}>
-        <input
+      <div className="p-3 flex-1 custom-cell-input text-sm text-[var(--color-text-default)]">
+        <Input
           value={localValue}
           {...params.attributes}
           ref={inputRef as React.RefObject<HTMLInputElement>}
-          onChange={(e) => {
-            handleChange(e);
-          }}
-          style={{
-            width: '100%',
-            maxWidth: '100%',
-            boxSizing: 'border-box',
-          }}
+          onChange={handleInputChange}
         />
       </div>
     );
@@ -130,29 +154,24 @@ const EditableCell = memo(({ fieldId, fieldKey, params, cellStyle }: EditableCel
 
   if (params.type === 'select') {
     return (
-      <div className="cell custom-cell" style={cellStyle}>
-        <select
-          value={localValue}
-          {...params.attributes}
-          ref={inputRef as React.RefObject<HTMLSelectElement>}
-          onChange={handleChange}
-          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
-        >
-          {params.options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+      <div className="p-3 flex-1 custom-cell-select text-sm text-[var(--color-text-default)]">
+        <Select value={localValue} onValueChange={handleSelectChange}>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {params.options.map((option) => (
+              <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     );
   }
 
-  return (
-    <div className="cell custom-cell" style={cellStyle}>
-      {params.value}
-    </div>
-  );
+  return <div className="p-3 flex-1 custom-cell-text text-sm text-[var(--color-text-default)]">{params.value}</div>;
 });
 
 export default EditableCell;

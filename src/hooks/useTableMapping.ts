@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 const useTableMapping = () => {
@@ -29,7 +29,7 @@ const useTableMapping = () => {
    * @param source
    */
   const appendSource = useCallback((source: FieldItem) => {
-    setSourceFields((prev) => [...prev, { ...source, id: `source-${uuidv4()}` } as FieldItem]);
+    setSourceFields((prev) => [...prev, { ...source, id: source.id ? source.id : `source-${uuidv4()}` } as FieldItem]);
   }, []);
 
   /**
@@ -37,7 +37,7 @@ const useTableMapping = () => {
    * @param target
    */
   const appendTarget = useCallback((target: FieldItem) => {
-    setTargetFields((prev) => [...prev, { ...target, id: `target-${uuidv4()}` } as FieldItem]);
+    setTargetFields((prev) => [...prev, { ...target, id: target.id ? target.id : `target-${uuidv4()}` } as FieldItem]);
   }, []);
 
   /**
@@ -76,6 +76,10 @@ const useTableMapping = () => {
 
       sourceFields.forEach((source) => {
         targetFields.forEach((target) => {
+          if (typeof source[name] === 'string' || typeof target[name] === 'string') {
+            return;
+          }
+
           if (source[name]?.columnKey && target[name]?.columnKey) {
             if (source[name]?.value === target[name]?.value) {
               sameNameMappings.push({
@@ -187,6 +191,7 @@ const useTableMapping = () => {
     setSourceFields((prev) =>
       prev.map((field) =>
         field.id === sourceId &&
+        typeof field[fieldKey] !== 'string' &&
         (field[fieldKey]?.type === 'string' || field[fieldKey]?.type === 'input' || field[fieldKey]?.type === 'select')
           ? {
               ...field,
@@ -204,6 +209,7 @@ const useTableMapping = () => {
     setTargetFields((prev) =>
       prev.map((field) =>
         field.id === targetId &&
+        typeof field[fieldKey] !== 'string' &&
         (field[fieldKey]?.type === 'string' || field[fieldKey]?.type === 'input' || field[fieldKey]?.type === 'select')
           ? {
               ...field,

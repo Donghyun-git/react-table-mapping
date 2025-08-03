@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
-import './index.css';
-import './mapping.css';
-import App from './App.tsx';
+
+import App from './App';
+import './lib/tailwind.css';
 
 createRoot(document.getElementById('root')!).render(<App />);
