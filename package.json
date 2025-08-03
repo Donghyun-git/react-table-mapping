@@ -103,7 +103,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/donghyun-git/react-table-mapping"
+    "url": "https://github.com/react-table-mapping/react-table-mapping"
   },
   "license": "MIT"
 }
