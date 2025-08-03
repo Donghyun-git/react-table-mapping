@@ -1,0 +1,113 @@
+{
+  "name": "react-table-mapping",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles": "./dist/react-table-mapping.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc -b && vite build",
+    "build:lib": "rm -rf dist && vite build",
+    "build:types": "tsc --project tsconfig.lib.json",
+    "lint": "eslint --fix",
+    "lint:check": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type": "tsc --noEmit",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build:lib",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.536.0",
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.11",
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@storybook/addon-docs": "^9.1.0",
+    "@storybook/addon-themes": "^9.1.0",
+    "@storybook/react-vite": "^9.1.0",
+    "@tailwindcss/vite": "^4.1.11",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "^24.0.10",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "es-toolkit": "^1.37.2",
+    "eslint": "^9.22.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "eslint-plugin-storybook": "^9.1.0",
+    "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
+    "prettier": "^3.5.3",
+    "react-hook-form": "^7.56.3",
+    "storybook": "^9.1.0",
+    "tw-animate-css": "^1.3.6",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.26.1",
+    "vite": "^6.3.1",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "yarn lint",
+      "yarn format"
+    ],
+    "*.{json,md,css}": [
+      "yarn format"
+    ]
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "author": {
+    "name": "donghyun-git",
+    "email": "ax34554@gmail.com",
+    "url": "https://github.com/donghyun-git"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "table",
+    "mapping",
+    "field-mapping",
+    "data-mapping",
+    "table-mapping"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/react-table-mapping/react-table-mapping"
+  },
+  "homepage": "https://github.com/donghyun-git/react-table-mapping#readme",
+  "license": "MIT"
+}

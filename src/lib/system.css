@@ -1,0 +1,98 @@
+:root {
+  --gray-1000: #151826;
+  --gray-900: #242632;
+  --gray-800: #545667;
+  --gray-700: #676a7b;
+  --gray-600: #8f92a4;
+  --gray-500: #afb2c5;
+  --gray-400: #d3d6ea;
+  --gray-300: #e4e6fa;
+  --gray-200: #eef0ff;
+  --gray-100: #f3f4f9;
+  --gray-50: #ffffff;
+
+  --info-900: #0369d3;
+  --info-600: #009bff;
+  --info-500: #34aaff;
+  --info-400: #5ebaff;
+  --info-300: #8ecdff;
+  --info-100: #e3f3ff;
+
+  --danger-600: #dc3412;
+
+  --color-text-default: var(--gray-1000);
+  --color-text-secondary: var(--gray-700);
+  --color-text-tertiary: var(--gray-600);
+  --color-text-danger: var(--danger-600);
+
+  --color-icon-primary: var(--info-900);
+  --color-icon-info: var(--info-600);
+  --color-icon-danger: var(--danger-600);
+
+  --color-bg-mapping-primary: var(--gray-50);
+  --color-bg-mapping-primary-hover: var(--gray-100);
+  --color-bg-mapping-secondary: var(--gray-100);
+  --color-bg-mapping-secondary-hover: var(--gray-200);
+  --color-bg-mapping-secondary-selected: var(--gray-400);
+  --color-bg-mapping-secondary-disabled: var(--gray-300);
+
+  --color-border-default: var(--gray-400);
+  --color-border-danger: var(--danger-600);
+
+  --shadow-sm: 0px 1px 2px 0px #0000000d;
+}
+
+/* Dark Mode Colors */
+.dark {
+  /* Dark mode grayscale */
+  --gray-1000: #151826;
+  --gray-900: #242632;
+  --gray-800: #545667;
+  --gray-700: #676a7b;
+  --gray-600: #8f92a4;
+  --gray-500: #afb2c5;
+  --gray-400: #d3d6ea;
+  --gray-300: #e4e6fa;
+  --gray-200: #eef0ff;
+  --gray-100: #f3f4f9;
+  --gray-50: #ffffff;
+
+  /* Dark mode - Info */
+  --info-900: #0369d3;
+  --info-600: #009bff;
+  --info-500: #34aaff;
+  --info-400: #5ebaff;
+  --info-300: #8ecdff;
+  --info-100: #e3f3ff;
+
+  /* Dark mode - Danger */
+  --danger-600: #dc3412;
+
+  /* Dark Mode Basic Text Colors */
+  --color-text-default: var(--gray-100);
+  --color-text-secondary: var(--gray-400);
+  --color-text-tertiary: var(--gray-500);
+  --color-text-danger: var(--danger-600);
+
+  /* Dark Mode Basic Icon Colors */
+  --color-icon-primary: var(--info-300);
+  --color-icon-info: var(--info-300);
+  --color-icon-danger: var(--danger-600);
+
+  /* Dark Mode Surface Background Colors */
+  --color-bg-mapping-primary: var(--gray-900);
+  --color-bg-mapping-primary-hover: var(--gray-700);
+  --color-bg-mapping-secondary: var(--gray-1000);
+  --color-bg-mapping-secondary-hover: var(--gray-600);
+  --color-bg-mapping-secondary-selected: var(--gray-500);
+  --color-bg-mapping-secondary-disabled: var(--gray-700);
+
+  /* Dark Mode Border Colors */
+  --color-border-default: var(--gray-800);
+  --color-border-danger: var(--danger-600);
+
+  /* Box shadow */
+  --shadow-sm:
+    0px 0px 0.5px 0px rgba(0, 0, 0, 0.5), 0px 0.5px 0px 0px rgba(255, 255, 255, 0.1) inset,
+    0px 0px 0.5px 0px rgba(255, 255, 255, 0.3) inset, 0px 1px 3px 0px rgba(0, 0, 0, 0.4);
+}

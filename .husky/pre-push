@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-push checks..."
+
+echo "🔍 Type checking..."
+npm run type
+
+echo "🔍 Build testing..."
+npm run build:lib
+
+echo "✅ Pre-push checks passed!" 
