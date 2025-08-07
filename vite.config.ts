@@ -33,13 +33,12 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'mjs' : 'js'}`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'uuid', 'lodash'],
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          uuid: 'uuid',
-          lodash: 'lodash',
+          'react/jsx-runtime': 'react/jsx-runtime',
         },
       },
     },
