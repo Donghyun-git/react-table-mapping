@@ -1,6 +1,6 @@
 {
   "name": "react-table-mapping",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.5",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -11,7 +11,12 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./styles": "./dist/react-table-mapping.css"
+    "./styles": {
+      "import": "./dist/react-table-mapping.css",
+      "require": "./dist/react-table-mapping.css",
+      "default": "./dist/react-table-mapping.css"
+    },
+    "./dist/react-table-mapping.css": "./dist/react-table-mapping.css"
   },
   "files": [
     "dist"
@@ -86,7 +91,8 @@
   },
   "peerDependencies": {
     "react": "^18 || ^19",
-    "react-dom": "^18 || ^19"
+    "react-dom": "^18 || ^19",
+    "tailwindcss": "^4.1.11"
   },
   "engines": {
     "node": ">=22.0.0"

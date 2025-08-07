@@ -2,6 +2,10 @@
 
 A React component library for visually representing and managing field mappings between tables with an intuitive drag-and-drop interface.
 
+## 📺 DEMO
+
+[DEMO](https://react-table-mapping.vercel.app/?path=/story/reacttablemapping--demo-bezier-lines)
+
 ## 🚀 Features
 
 - 🎯 **Drag & Drop**: Intuitive mapping creation with visual feedback
@@ -384,6 +388,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Repository](https://github.com/donghyun-git/react-table-mapping)
 - [Issues](https://github.com/donghyun-git/react-table-mapping/issues)
 - [NPM Package](https://www.npmjs.com/package/react-table-mapping)
+
+## 📝 Changelog
+
+Now Fix not alert type error...
+
+Now Is Beta.. don't use in production.
 
 ---
 
