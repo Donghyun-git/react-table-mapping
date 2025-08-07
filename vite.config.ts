@@ -1,15 +1,13 @@
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import path from 'path';
+import type { PreRenderedAsset } from 'rollup';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(),
     dts({
       insertTypesEntry: true,
       exclude: [
@@ -33,18 +31,27 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'mjs' : 'js'}`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'uuid', 'lodash'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          'react/jsx-runtime': 'react/jsx-runtime',
+          'react/jsx-runtime': 'jsxRuntime',
+          uuid: 'uuid',
+          lodash: 'lodash',
+        },
+        assetFileNames: (assetInfo: PreRenderedAsset): string => {
+          if (assetInfo.name === 'style.css') {
+            return 'react-table-mapping.css';
+          }
+          return assetInfo.name || 'unknown.file';
         },
       },
     },
     sourcemap: true,
     emptyOutDir: true,
   },
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
