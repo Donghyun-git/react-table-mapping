@@ -1,6 +1,6 @@
 {
   "name": "react-table-mapping",
-  "version": "0.0.0",
+  "version": "1.0.0-beta.2",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -108,6 +108,6 @@
     "type": "git",
     "url": "https://github.com/react-table-mapping/react-table-mapping"
   },
-  "homepage": "https://github.com/donghyun-git/react-table-mapping#readme",
+  "homepage": "https://github.com/react-table-mapping/react-table-mapping#readme",
   "license": "MIT"
 }
