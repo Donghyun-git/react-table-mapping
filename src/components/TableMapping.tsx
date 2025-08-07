@@ -252,6 +252,7 @@ function TableMapping({
             forceUpdate={forceUpdate}
             hoveredMapping={hoveredMapping}
             setHoveredMapping={setHoveredMapping}
+            isDragging={dragging?.active}
           />
 
           {/* dragging line */}
