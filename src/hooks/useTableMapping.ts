@@ -6,9 +6,6 @@ const useTableMapping = () => {
   const [targetFields, setTargetFields] = useState<FieldItem[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
-  console.log(sourceFields, 'sourceFields');
-  console.log(targetFields, 'targetFields');
-
   /**
    * you can get current source fields.
    */
