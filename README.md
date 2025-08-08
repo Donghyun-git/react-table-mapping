@@ -2,6 +2,10 @@
 
 A React component library for visually representing and managing field mappings between tables with an intuitive drag-and-drop interface.
 
+Current use `tailwindcss v4.1.11` & `@tailwindcss/postcss v4.1.11`
+
+If installed project use tailwindcss v3, you may encounter build errors due to version conflicts.
+
 ## 📺 DEMO
 
 [DEMO](https://react-table-mapping.vercel.app/?path=/story/reacttablemapping--demo-bezier-lines)
@@ -24,6 +28,21 @@ yarn add react-table-mapping
 pnpm add react-table-mapping
 ```
 
+## 📋 Requirements
+
+```
+"react": "^19.0.0",
+"react-dom": "^19.0.0",
+"tailwindcss": ">=4.1.11",
+"@tailwindcss/postcss": ">=4.1.11"
+```
+
+### engines
+
+```
+"node": ">=22.0.0"
+```
+
 ### Import Styles
 
 ```typescript
@@ -35,7 +54,7 @@ import 'react-table-mapping/styles';
 ```tsx
 import React from 'react';
 import TableMapping from 'react-table-mapping';
-import { TableMappingProvider } from 'react-table-mapping';
+import { type FieldItemInput, TableMappingProvider } from 'react-table-mapping';
 
 function App() {
   // Define source table columns
@@ -60,7 +79,7 @@ function App() {
       id: 'source-0',
       key: 'source-0',
     },
-  ];
+  ] satisfies FieldItemInput[];
 
   // Target field data
   const targetFields = [
@@ -91,7 +110,7 @@ function App() {
       id: 'target-0',
       key: 'target-0',
     },
-  ];
+  ] satisfies FieldItemInput[];
 
   // Initial mapping relationships
   const initialMappings = [
@@ -369,12 +388,6 @@ $ npm run storybook
 $ yarn storybook
 ```
 
-## 📋 Requirements
-
-- **Node.js**: >=22.0.0
-- **React**: ^18 || ^19
-- **TypeScript**: ^5.7.2
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -390,8 +403,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [NPM Package](https://www.npmjs.com/package/react-table-mapping)
 
 ## 📝 Changelog
-
-Now Fix not alert type error...
 
 Now Is Beta.. don't use in production.
 
