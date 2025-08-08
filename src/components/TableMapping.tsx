@@ -5,6 +5,7 @@ import SourceTable from '@/components/SourceTable';
 import TargetTable from '@/components/TargetTable';
 import { Button } from '@/components/ui/button';
 import { useMappings, useTargetFields } from '@/contexts';
+import { type TableMappingProps } from '@/types/table-mapping';
 import { SvgLineExtractor } from '@/utils';
 
 function TableMapping({

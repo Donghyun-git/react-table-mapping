@@ -1,7 +1,9 @@
 import { X } from 'lucide-react';
 import { memo } from 'react';
 
-interface MappingLinesProps {
+import type { Mapping } from '@/types/table-mapping';
+
+export interface MappingLinesProps {
   mappings: Mapping[];
   createPath: (sourceId: string, targetId: string) => { path: string; midX: number; midY: number };
   lineColor: string;

@@ -1,3 +1,5 @@
+import { type LineType } from '@/types/table-mapping';
+
 const SvgLineExtractor = ({
   type,
   startX,

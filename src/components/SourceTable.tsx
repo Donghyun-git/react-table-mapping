@@ -2,6 +2,7 @@ import React, { memo, useEffect, useState } from 'react';
 
 import EditableCell from '@/components/EditableCell';
 import { useSourceFields } from '@/contexts';
+import type { FieldItem, FieldItemInput, HeaderColumnProps } from '@/types/table-mapping';
 import { generateSourceFields } from '@/utils';
 
 interface SourceTableProps {

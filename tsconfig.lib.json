@@ -22,6 +22,8 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
+    "typeRoots": ["./dist/index.d.ts"],
+    "declarationDir": "dist",
 
     /* Linting */
     "strict": true,

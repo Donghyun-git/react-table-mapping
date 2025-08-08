@@ -1,6 +1,6 @@
 {
   "name": "react-table-mapping",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -18,6 +18,10 @@
     },
     "./dist/react-table-mapping.css": "./dist/react-table-mapping.css"
   },
+  "style": "./dist/react-table-mapping.css",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "files": [
     "dist"
   ],
@@ -47,7 +51,6 @@
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0"
   },
@@ -58,6 +61,7 @@
     "@storybook/react-vite": "^9.1.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/vite": "^4.1.11",
+    "tailwindcss": "^4.1.11",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^24.0.10",
     "@types/react": "^19.0.10",
@@ -91,8 +95,7 @@
   },
   "peerDependencies": {
     "react": "^18 || ^19",
-    "react-dom": "^18 || ^19",
-    "tailwindcss": "^4.1.11"
+    "react-dom": "^18 || ^19"
   },
   "engines": {
     "node": ">=22.0.0"

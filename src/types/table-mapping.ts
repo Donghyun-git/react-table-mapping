@@ -2,12 +2,12 @@
  * svg line type
  * - default value is `straight`
  */
-type LineType = 'bezier' | 'straight' | 'step';
+export type LineType = 'bezier' | 'straight' | 'step';
 
 /**
  * source column type
  */
-interface HeaderColumnProps {
+export interface HeaderColumnProps {
   /**
    * column title
    */
@@ -32,7 +32,7 @@ interface HeaderColumnProps {
  * - if you want to match with `FieldItem.key`, use `key` props.
  * - can use `sameNameMapping` methods in `useTableMapping` hook.
  */
-interface OuterFieldItem {
+export interface OuterFieldItem {
   [field: string]:
     | {
         type: 'string';
@@ -66,7 +66,7 @@ interface OuterFieldItem {
 /**
  * field item type for `source` and `target`
  */
-interface FieldItem extends Partial<OuterFieldItem> {
+export interface FieldItem extends Partial<OuterFieldItem> {
   /**
    * field array item key value
    * - `source`: `source-${randomID}`
@@ -84,7 +84,7 @@ interface FieldItem extends Partial<OuterFieldItem> {
 /**
  * mapping array item key value
  */
-interface Mapping {
+export interface Mapping {
   /**
    * mapping array key value
    * - `id`: `mapping-${source.id}-${target.id}`
@@ -105,9 +105,9 @@ interface Mapping {
 /**
  * field item without internal properties (for user input)
  */
-type FieldItemInput = Partial<FieldItem>;
+export type FieldItemInput = Partial<FieldItem>;
 
-interface TableMappingProps {
+export interface TableMappingProps {
   /**
    * source field array item
    */

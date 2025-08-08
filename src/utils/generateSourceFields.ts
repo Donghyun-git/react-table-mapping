@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import type { FieldItem, TableMappingProps } from '@/types/table-mapping';
+
 const generateSourceFields = ({ sources }: Pick<TableMappingProps, 'sources'>): FieldItem[] => {
   return (sources?.map((source) => ({
     ...source,
