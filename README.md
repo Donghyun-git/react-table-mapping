@@ -1,6 +1,6 @@
 # React Table Mapping
 
-In `v1.0.0-beta.8`, remove tailwind dependencies and migrated pure css.
+In `v1.0.0-beta.9`, remove tailwind dependencies and migrated pure css.
 
 ## 📺 DEMO
 
@@ -401,10 +401,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Repository](https://github.com/donghyun-git/react-table-mapping)
 - [Issues](https://github.com/donghyun-git/react-table-mapping/issues)
 - [NPM Package](https://www.npmjs.com/package/react-table-mapping)
-
-## 📝 Changelog
-
-Now Is Beta.. don't use in production.
 
 ---
 
