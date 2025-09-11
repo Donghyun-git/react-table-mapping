@@ -1,10 +1,6 @@
 # React Table Mapping
 
-A React component library for visually representing and managing field mappings between tables with an intuitive drag-and-drop interface.
-
-Current use `tailwindcss v4.1.11` & `@tailwindcss/postcss v4.1.11`
-
-If installed project use tailwindcss v3, you may encounter build errors due to version conflicts.
+In `v1.0.0-beta.8`, remove tailwind dependencies and migrated pure css.
 
 ## 📺 DEMO
 
@@ -33,8 +29,6 @@ pnpm add react-table-mapping
 ```
 "react": "^19.0.0",
 "react-dom": "^19.0.0",
-"tailwindcss": ">=4.1.11",
-"@tailwindcss/postcss": ">=4.1.11"
 ```
 
 ### engines
@@ -74,6 +68,12 @@ function App() {
         type: 'input',
         columnKey: 'name',
         value: 'USER_ID',
+        attributes: {
+          //you can custom input attributes
+          style: {
+            height: '36px', //like this
+          },
+        },
         onChange: (value) => console.log('Source name changed:', value),
       },
       id: 'source-0',
@@ -142,14 +142,14 @@ export default App;
 
 ### TableMapping Props
 
-| Prop              | Type                     | Default      | Description                   |
-| ----------------- | ------------------------ | ------------ | ----------------------------- |
-| `lineType`        | `'straight' \| 'bezier'` | `'straight'` | Type of connection lines      |
-| `sourceColumns`   | `HeaderColumnProps[]`    | `[]`         | Source table header columns   |
-| `targetColumns`   | `HeaderColumnProps[]`    | `[]`         | Target table header columns   |
-| `sources`         | `FieldItemInput[]`       | `[]`         | Source field data             |
-| `targets`         | `FieldItemInput[]`       | `[]`         | Target field data             |
-| `initialMappings` | `Mapping[]`              | `[]`         | Initial mapping relationships |
+| Prop              | Type                               | Default    | Description                   |
+| ----------------- | ---------------------------------- | ---------- | ----------------------------- |
+| `lineType`        | `'straight' \| 'bezier' \| 'step'` | `'bezier'` | Type of connection lines      |
+| `sourceColumns`   | `HeaderColumnProps[]`              | `[]`       | Source table header columns   |
+| `targetColumns`   | `HeaderColumnProps[]`              | `[]`       | Target table header columns   |
+| `sources`         | `FieldItemInput[]`                 | `[]`       | Source field data             |
+| `targets`         | `FieldItemInput[]`                 | `[]`       | Target field data             |
+| `initialMappings` | `Mapping[]`                        | `[]`       | Initial mapping relationships |
 
 ### HeaderColumnProps
 
