@@ -2,7 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import TableMapping from '@/components/TableMapping';
 import { TableMappingProvider } from '@/contexts';
-import '@/lib/tailwind.css';
+import '@/lib/system.css';
+
+import '../.storybook/storybook.css';
 
 const meta = {
   title: 'ReactTableMapping',

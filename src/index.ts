@@ -1,4 +1,4 @@
-import './lib/tailwind.css';
+import './lib/system.css';
 
 export { default as TableMapping } from './components/TableMapping';
 

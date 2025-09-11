@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import MappingLines from '@/components/MappingLines';
 import SourceTable from '@/components/SourceTable';
 import TargetTable from '@/components/TargetTable';
-import { Button } from '@/components/ui/button';
 import { useMappings, useTargetFields } from '@/contexts';
 import { type TableMappingProps } from '@/types/table-mapping';
 import { SvgLineExtractor } from '@/utils';
@@ -22,8 +21,7 @@ function TableMapping({
   hoverLineColor = '#e3f3ff',
   onMappingChange,
 }: TableMappingProps) {
-  const { mappings, sameNameMapping, sameLineMapping, clearMappings, addMapping, removeMapping, updateMappings } =
-    useMappings();
+  const { mappings, addMapping, removeMapping, updateMappings } = useMappings();
 
   const { targetFields } = useTargetFields();
 
@@ -222,9 +220,9 @@ function TableMapping({
   }, [initialMappings]);
 
   return (
-    <div className="react-table-mapping p-5 w-full h-full">
+    <div className="react-table-mapping">
       <div
-        className="mapping-container relative flex justify-between h-full rounded-sm bg-[var(--color-bg-mapping-primary)] overflow-auto"
+        className="mapping-container"
         style={{
           height: `${containerHeight}px`,
           minHeight: `${containerMinHeight}px`,
@@ -236,7 +234,7 @@ function TableMapping({
         {/* SVG mapping line - add key property to force re-render when resizing */}
         <svg
           ref={svgRef}
-          className="mapping-svg flex-1 w-full  absolute top-0 left-0 right-0"
+          className="mapping-svg"
           style={{ height: `${containerHeight}px`, minHeight: `${containerMinHeight}px` }}
           onMouseMove={handleDrag}
           onMouseUp={handleDragEnd}
@@ -305,12 +303,6 @@ function TableMapping({
 
         {/* target table */}
         <TargetTable targets={targets} targetColumns={targetColumns} />
-      </div>
-
-      <div className="flex gap-2 items-center justify-center mt-5">
-        <Button onClick={sameLineMapping}>Same Line Mapping</Button>
-        <Button onClick={() => sameNameMapping('name')}>Same Name Mapping [ target filed : Name]</Button>
-        <Button onClick={clearMappings}>Clear Mapping</Button>
       </div>
     </div>
   );

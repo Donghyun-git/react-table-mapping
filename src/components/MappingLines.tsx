@@ -46,21 +46,21 @@ const MappingLines = memo(
               onMouseEnter={() => !isDragging && setHoveredMapping(mapping.id)}
               onMouseLeave={() => !isDragging && setHoveredMapping(null)}
             >
+              {/* actual view line */}
               <path
                 d={pathData.path}
                 stroke={lineColor}
                 strokeWidth={lineWidth}
                 fill="none"
                 markerEnd={`url(#arrowhead-${effectiveHoveredMapping === mapping.id ? 'hover' : 'normal'})`}
-                className={isDragging ? '' : 'hover:stroke-2 hover:filter-drop-shadow-0-0-3px-rgba-33-150-243-0-5'}
+                className="line-base"
               />
 
+              {/* hover area */}
               <path
                 d={pathData.path}
-                stroke="transparent"
-                strokeWidth="20"
-                fill="none"
-                className={isDragging ? '' : 'cursor-pointer'}
+                strokeWidth={lineWidth + 4}
+                className={`hover-area ${isDragging ? 'dragging' : ''}`}
                 onClick={() => !isDragging && removeMapping(mapping.id)}
               />
             </g>
@@ -77,24 +77,22 @@ const MappingLines = memo(
                 className="mapping-line-group hovered"
                 onMouseEnter={() => !isDragging && setHoveredMapping(hoveredMappingData.id)}
                 onMouseLeave={() => !isDragging && setHoveredMapping(null)}
-                style={{ zIndex: 1000 }}
               >
+                {/* actual view line */}
                 <path
                   d={pathData.path}
                   stroke={hoverLineColor}
                   strokeWidth={lineWidth + 0.5}
                   fill="none"
                   markerEnd="url(#arrowhead-hover)"
-                  className="path-line path-line-hovered"
-                  style={{ filter: 'drop-shadow(0 0 3px rgba(255, 87, 34, 0.5))' }}
+                  className="line-base"
                 />
 
+                {/* hover area */}
                 <path
                   d={pathData.path}
-                  stroke="transparent"
-                  strokeWidth="20"
-                  fill="none"
-                  style={{ cursor: isDragging ? 'default' : 'pointer' }}
+                  strokeWidth={lineWidth + 4.5}
+                  className={`hover-area ${isDragging ? 'dragging' : ''}`}
                   onClick={() => !isDragging && removeMapping(hoveredMappingData.id)}
                 />
 
@@ -106,21 +104,8 @@ const MappingLines = memo(
                   style={{ overflow: 'visible' }}
                   onClick={() => !isDragging && removeMapping(hoveredMappingData.id)}
                 >
-                  <div
-                    className={`
-                      w-4 h-4 border border-[var(--color-border-danger)] 
-                      flex items-center justify-center bg-[var(--color-bg-mapping-primary)] 
-                      rounded-full text-[var(--color-icon-danger)] shadow-sm 
-                      transition-all duration-150
-                      ${isDragging ? 'cursor-default opacity-50' : 'hover:shadow-md hover:scale-110 cursor-pointer'}
-                    `}
-                  >
-                    <X
-                      className={`
-                      transition-all duration-150
-                      ${isDragging ? 'w-2.5 h-2.5' : 'w-2.5 h-2.5 group-hover:w-3 group-hover:h-3'}
-                    `}
-                    />
+                  <div className={`mapping-delete-button ${isDragging ? 'dragging' : ''}`}>
+                    <X className="mapping-delete-icon" />
                   </div>
                 </foreignObject>
               </g>

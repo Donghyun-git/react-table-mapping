@@ -136,12 +136,12 @@ const EditableCell = memo(({ fieldId, fieldKey, params }: EditableCellProps) => 
   );
 
   if (typeof params === 'string') {
-    return <div className="p-3 flex-1 custom-cell-text text-sm text-[var(--color-text-default)]">{params}</div>;
+    return <div className="custom-cell-text ">{params}</div>;
   }
 
   if (params.type === 'input') {
     return (
-      <div className="p-3 flex-1 custom-cell-input text-sm text-[var(--color-text-default)]">
+      <div className="custom-cell-input">
         <Input
           value={localValue}
           {...params.attributes}
@@ -154,9 +154,9 @@ const EditableCell = memo(({ fieldId, fieldKey, params }: EditableCellProps) => 
 
   if (params.type === 'select') {
     return (
-      <div className="p-3 flex-1 custom-cell-select text-sm text-[var(--color-text-default)]">
+      <div className="custom-cell-select">
         <Select value={localValue} onValueChange={handleSelectChange}>
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -171,7 +171,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params }: EditableCellProps) => 
     );
   }
 
-  return <div className="p-3 flex-1 custom-cell-text text-sm text-[var(--color-text-default)]">{params.value}</div>;
+  return <div className="custom-cell-text">{params.value}</div>;
 });
 
 export default EditableCell;

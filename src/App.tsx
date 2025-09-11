@@ -1,5 +1,6 @@
 import TableMapping from '@/components/TableMapping';
 import { TableMappingProvider } from '@/contexts';
+import type { FieldItemInput } from '@/types/table-mapping';
 
 function App() {
   const sourceColumns = [{ title: 'Name', key: 'name' }];
@@ -172,7 +173,11 @@ function App() {
 
   return (
     <TableMappingProvider>
-      <div className="h-[400px]">
+      <div
+        style={{
+          height: '400px',
+        }}
+      >
         <TableMapping
           lineType="bezier"
           sources={sourceFields}
