@@ -32,6 +32,16 @@ export const useSourceFields = () =>
     sourceFields: ctx.getSourceFields(),
 
     /**
+     * remove source field item
+     */
+    removeSourceField: ctx.removeSource,
+
+    /**
+     * you can append source field item.
+     */
+    appendSourceField: ctx.appendSource,
+
+    /**
      * you can update all source fields at once
      * @param newSourceFields
      */
@@ -53,6 +63,16 @@ export const useTargetFields = () =>
      * you can get current target fields.
      */
     targetFields: ctx.getTargetFields(),
+
+    /**
+     * remove target field item
+     */
+    removeTargetField: ctx.removeTarget,
+
+    /**
+     * you can append target field item.
+     */
+    appendTargetField: ctx.appendTarget,
 
     /**
      * you can update all target fields at once

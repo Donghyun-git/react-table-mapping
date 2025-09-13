@@ -1,6 +1,7 @@
 # React Table Mapping
 
-In `v1.0.0-beta.9`, remove tailwind dependencies and migrated pure css.
+1. In `v1.0.0-beta.9`, remove tailwind dependencies and migrated pure css.
+2. In `v1.0.0-beta.10`, fix maximum rerender problem and container height resize problem.
 
 ## 📺 DEMO
 
@@ -263,19 +264,28 @@ Dropdown selection with options:
 The `TableMappingProvider` manages the internal state and provides mapping functionality:
 
 ```tsx
-import { TableMappingProvider, useTableMapping } from 'react-table-mapping';
+import { TableMappingProvider, useMappings, useSourceFields, useTargetFields } from 'react-table-mapping';
 
 function CustomComponent() {
   const {
     sourceFields,
+    appendSourceField,
+    // ...rest
+  } = useSourceFields();
+
+  const {
     targetFields,
+    appendTargetField,
+    // ...rest
+  } = useTargetFields();
+  const {
     mappings,
-    appendSource,
-    appendTarget,
-    removeSource,
-    removeTarget,
+    addMapping,
+    removeMapping,
+    updateMappings,
     sameNameMapping,
-  } = useTableMapping();
+    // ...rest
+  } = useMappings();
 
   // Your custom logic here
 }
@@ -317,18 +327,19 @@ The library uses CSS variables for theming and supports both light and dark mode
 
 ```tsx
 function DynamicMappingExample() {
-  const { appendSource, appendTarget, removeSource } = useTableMapping();
+  const { appendSourceField, removeSourceField } = useSourceFields();
+  const { appendTargetField, removeTargetField } = useTargetFields();
 
   const addNewSourceField = () => {
-    appendSource({
+    appendSourceField({
+      id: `source-${Date.now()}`,
+      key: `source-${Date.now()}`,
       name: {
         type: 'input',
         columnKey: 'name',
         value: 'New Field',
         onChange: (value) => console.log('Changed:', value),
       },
-      id: `source-${Date.now()}`,
-      key: `source-${Date.now()}`,
     });
   };
 

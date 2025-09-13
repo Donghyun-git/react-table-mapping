@@ -1,8 +1,15 @@
 import TableMapping from '@/components/TableMapping';
-import { TableMappingProvider } from '@/contexts';
+import { useMappings, useSourceFields, useTargetFields } from '@/contexts';
 import type { FieldItemInput } from '@/types/table-mapping';
 
 function App() {
+  const { sourceFields: currentSourceFields, appendSourceField } = useSourceFields();
+  const { targetFields: currentTargetFields, appendTargetField } = useTargetFields();
+
+  const { mappings } = useMappings();
+
+  console.log('useMappings hook [ mappings ]  =>', mappings);
+
   const sourceColumns = [{ title: 'Name', key: 'name' }];
 
   const targetColumns = [
@@ -172,22 +179,46 @@ function App() {
   ];
 
   return (
-    <TableMappingProvider>
-      <div
-        style={{
-          height: '400px',
+    <div style={{ height: '100vh' }}>
+      <button
+        onClick={() => {
+          appendSourceField({
+            name: {
+              type: 'string',
+              columnKey: 'name',
+              value: `COL${currentSourceFields.length + 1}`,
+            },
+            id: `source-${currentSourceFields.length + 1}`,
+            key: `source-${currentSourceFields.length + 1}`,
+          });
         }}
       >
-        <TableMapping
-          lineType="bezier"
-          sources={sourceFields}
-          targets={targetFields}
-          sourceColumns={sourceColumns}
-          targetColumns={targetColumns}
-          initialMappings={initialMappings}
-        />
-      </div>
-    </TableMappingProvider>
+        소스 추가
+      </button>
+      <button
+        onClick={() => {
+          appendTargetField({
+            name: {
+              type: 'string',
+              columnKey: 'name',
+              value: `COL${currentTargetFields.length + 1}`,
+            },
+            id: `target-${currentTargetFields.length + 1}`,
+            key: `target-${currentTargetFields.length + 1}`,
+          });
+        }}
+      >
+        타겟 추가
+      </button>
+      <TableMapping
+        lineType="bezier"
+        sources={sourceFields}
+        targets={targetFields}
+        sourceColumns={sourceColumns}
+        targetColumns={targetColumns}
+        initialMappings={initialMappings}
+      />
+    </div>
   );
 }
 

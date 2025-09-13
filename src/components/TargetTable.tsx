@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import { memo, useEffect } from 'react';
 
 import EditableCell from '@/components/EditableCell';
 import { useTargetFields } from '@/contexts';
@@ -6,6 +6,7 @@ import type { FieldItem, FieldItemInput, HeaderColumnProps } from '@/types/table
 import { generateTargetFields } from '@/utils';
 
 interface TargetTableProps {
+  targetTableRef: React.RefObject<HTMLDivElement | null>;
   targets: FieldItemInput[];
   targetColumns: Array<Omit<HeaderColumnProps, 'type'>>;
 }
@@ -33,19 +34,18 @@ const TargetRow = memo(({ field }: { field: FieldItem }) => {
   );
 });
 
-const TargetTable = ({ targets, targetColumns }: TargetTableProps) => {
-  const [targetFieldState, setTargetFieldState] = useState<FieldItem[]>([]);
-  const { updateTargetFields } = useTargetFields();
+const TargetTable = ({ targetTableRef, targets, targetColumns }: TargetTableProps) => {
+  const { targetFields, updateTargetFields } = useTargetFields();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const initialFields = generateTargetFields({ targets });
 
     updateTargetFields(initialFields);
-    setTargetFieldState(initialFields);
-  }, [targets, updateTargetFields]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <div className="target-table">
+    <div ref={targetTableRef} className="target-table">
       <div className="target-table-header">
         {targetColumns.map((column) => (
           <span key={column.key} className="target-table-header-cell">
@@ -54,7 +54,7 @@ const TargetTable = ({ targets, targetColumns }: TargetTableProps) => {
         ))}
       </div>
       <div className="target-table-body">
-        {targetFieldState.map((field) => (
+        {targetFields.map((field) => (
           <TargetRow key={field.id || field.key} field={field} />
         ))}
       </div>

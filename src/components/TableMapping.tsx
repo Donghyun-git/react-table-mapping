@@ -16,8 +16,7 @@ function TableMapping({
   lineType = 'straight',
   lineColor = '#009bff',
   lineWidth = 1.5,
-  containerMinHeight = 400,
-  containerHeight = 400,
+  containerHeight: containerHeightProps = 400,
   hoverLineColor = '#e3f3ff',
   onMappingChange,
 }: TableMappingProps) {
@@ -26,11 +25,18 @@ function TableMapping({
   const { targetFields } = useTargetFields();
 
   const svgRef = useRef<SVGSVGElement>(null);
+  const sourceTableRef = useRef<HTMLDivElement>(null);
+  const targetTableRef = useRef<HTMLDivElement>(null);
 
   /**
    * hovering mapping id
    */
   const [hoveredMapping, setHoveredMapping] = useState<string | null>(null);
+
+  /**
+   * personal instance of container Height
+   */
+  const [containerHeight, setContainerHeight] = useState<number>(containerHeightProps);
 
   /**
    * dragging state
@@ -51,7 +57,7 @@ function TableMapping({
     currentY: 0,
   });
 
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const [forceUpdate, setForceUpdate] = useState<number>(0);
 
   const handleResize = () => {
     setForceUpdate((prev) => prev + 1);
@@ -168,7 +174,6 @@ function TableMapping({
 
       if (!containerRect) return null;
 
-      // 컨테이너를 기준으로 한 상대적 위치 계산
       const startX = sourceRect.right - containerRect.left;
       const startY = sourceRect.top + sourceRect.height / 2 - containerRect.top;
       const endX = targetRect.left - containerRect.left;
@@ -193,8 +198,46 @@ function TableMapping({
     if (onMappingChange) {
       onMappingChange(mappings);
     }
-  }, [mappings, onMappingChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mappings]);
 
+  //mutation observer effect
+  useEffect(() => {
+    if (sourceTableRef.current && targetTableRef.current) {
+      const handleSvgHeightResize = (mutations: MutationRecord[]) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            const sourceTable = sourceTableRef.current;
+            const targetTable = targetTableRef.current;
+
+            if (!sourceTable || !targetTable) return;
+
+            const containerHeight = Math.max(sourceTable.clientHeight, targetTable.clientHeight);
+
+            setContainerHeight(containerHeight);
+          }
+        });
+      };
+
+      const tableHeightMutationObserver = new MutationObserver(handleSvgHeightResize);
+
+      tableHeightMutationObserver.observe(sourceTableRef.current, {
+        childList: true,
+        subtree: true,
+      });
+
+      tableHeightMutationObserver.observe(targetTableRef.current, {
+        childList: true,
+        subtree: true,
+      });
+
+      return () => {
+        tableHeightMutationObserver.disconnect();
+      };
+    }
+  }, []);
+
+  //resize effect
   useEffect(() => {
     window.addEventListener('resize', handleResize);
 
@@ -217,25 +260,29 @@ function TableMapping({
       return () => clearTimeout(renderTimer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialMappings]);
+  }, []);
 
   return (
     <div className="react-table-mapping">
       <div
         className="mapping-container"
         style={{
-          height: `${containerHeight}px`,
-          minHeight: `${containerMinHeight}px`,
+          minHeight: `${containerHeight}px`,
         }}
       >
         {/* source table */}
-        <SourceTable sources={sources} sourceColumns={sourceColumns} handleDragStart={handleDragStart} />
+        <SourceTable
+          sourceTableRef={sourceTableRef}
+          sources={sources}
+          sourceColumns={sourceColumns}
+          handleDragStart={handleDragStart}
+        />
 
         {/* SVG mapping line - add key property to force re-render when resizing */}
         <svg
           ref={svgRef}
           className="mapping-svg"
-          style={{ height: `${containerHeight}px`, minHeight: `${containerMinHeight}px` }}
+          style={{ minHeight: `${containerHeight}px` }}
           onMouseMove={handleDrag}
           onMouseUp={handleDragEnd}
           onMouseLeave={handleDragEnd}
@@ -302,7 +349,7 @@ function TableMapping({
         </svg>
 
         {/* target table */}
-        <TargetTable targets={targets} targetColumns={targetColumns} />
+        <TargetTable targetTableRef={targetTableRef} targets={targets} targetColumns={targetColumns} />
       </div>
     </div>
   );

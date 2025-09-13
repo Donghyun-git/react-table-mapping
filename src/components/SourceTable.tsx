@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import { memo, useEffect } from 'react';
 
 import EditableCell from '@/components/EditableCell';
 import { useSourceFields } from '@/contexts';
@@ -6,6 +6,7 @@ import type { FieldItem, FieldItemInput, HeaderColumnProps } from '@/types/table
 import { generateSourceFields } from '@/utils';
 
 interface SourceTableProps {
+  sourceTableRef: React.RefObject<HTMLDivElement | null>;
   sources: FieldItemInput[];
   sourceColumns: Array<Omit<HeaderColumnProps, 'type'>>;
   handleDragStart: (e: React.MouseEvent, sourceId: string) => void;
@@ -50,9 +51,8 @@ const SourceRow = memo(
 /**
  * main source table component
  */
-const SourceTable = ({ sources, sourceColumns, handleDragStart }: SourceTableProps) => {
-  const [sourceFieldState, setSourceFieldState] = useState<FieldItem[]>([]);
-  const { updateSourceFields } = useSourceFields();
+const SourceTable = ({ sourceTableRef, sources, sourceColumns, handleDragStart }: SourceTableProps) => {
+  const { sourceFields, updateSourceFields } = useSourceFields();
 
   /**
    * initial data setup
@@ -61,18 +61,18 @@ const SourceTable = ({ sources, sourceColumns, handleDragStart }: SourceTablePro
     const initialFields = generateSourceFields({ sources });
 
     updateSourceFields(initialFields);
-    setSourceFieldState(initialFields);
-  }, [sources, updateSourceFields]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <div className="source-table">
+    <div ref={sourceTableRef} className="source-table">
       <div className="source-table-header">
         {sourceColumns.map((column) => (
           <span key={column.key}>{column.title}</span>
         ))}
       </div>
       <div className="source-table-body">
-        {sourceFieldState.map((field) => (
+        {sourceFields.map((field) => (
           <SourceRow key={field.id || field.key} field={field} handleDragStart={handleDragStart} />
         ))}
       </div>
