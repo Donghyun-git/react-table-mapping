@@ -7,6 +7,14 @@ const useTableMapping = () => {
   const [sourceFields, setSourceFields] = useState<FieldItem[]>([]);
   const [targetFields, setTargetFields] = useState<FieldItem[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);
+  const [redrawCount, setRedrawCount] = useState<number>(0);
+
+  /**
+   * you can refresh the table mapping.
+   */
+  const redraw = useCallback(() => {
+    setRedrawCount((prev) => prev + 1);
+  }, []);
 
   /**
    * you can get current source fields.
@@ -224,6 +232,13 @@ const useTableMapping = () => {
 
   return {
     /**
+     * you can redraw the table mapping.
+     */
+    redraw,
+
+    redrawCount,
+
+    /**
      * you can get current source fields.
      */
     getSourceFields,
@@ -340,4 +355,5 @@ const useTableMapping = () => {
     updateTargetFieldValue,
   };
 };
+
 export default useTableMapping;

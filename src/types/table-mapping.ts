@@ -159,43 +159,27 @@ export interface TableMappingProps {
   hoverLineColor?: string;
 
   /**
-   * you can custom `source` table style.
+   * disabled mapping and contents
    */
-  sourceTableStyle?: React.CSSProperties;
+  disabled?: boolean;
 
   /**
-   * you can custom `target` table style.
+   * no data component
+   * - you can custom no data component.
    */
-  targetTableStyle?: React.CSSProperties;
+  noDataComponent?: React.ReactNode;
 
   /**
-   * you can custom `table header` style.
+   * after source field remove
+   * @params removeSourceId
    */
-  tableHeaderStyle?: React.CSSProperties;
+  afterSourceFieldRemove?: (removedSourceId: string) => void;
 
   /**
-   * you can custom `table cell` style.
+   * after target field remove
+   * @params removeTargetId
    */
-  tableCellStyle?: React.CSSProperties;
-
-  /**
-   * you can custom `connector` style.
-   */
-  connectorStyle?: React.CSSProperties;
-
-  /**
-   * you can custom `container` style.
-   */
-  containerMinHeight?: number;
-
-  /**
-   * you can custom `container` height.
-   */
-  containerHeight?: number;
-
-  /**
-   * you can custom `container` min height.
-   */
+  afterTargetFieldRemove?: (removedTargetId: string) => void;
 
   /**
    * if mapping, `onMappingChange` return current Mapping states.

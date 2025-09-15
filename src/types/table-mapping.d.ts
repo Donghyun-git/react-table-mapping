@@ -159,39 +159,9 @@ interface TableMappingProps {
   hoverLineColor?: string;
 
   /**
-   * you can custom `source` table style.
+   * disabled mapping and contents
    */
-  sourceTableStyle?: React.CSSProperties;
-
-  /**
-   * you can custom `target` table style.
-   */
-  targetTableStyle?: React.CSSProperties;
-
-  /**
-   * you can custom `table header` style.
-   */
-  tableHeaderStyle?: React.CSSProperties;
-
-  /**
-   * you can custom `table cell` style.
-   */
-  tableCellStyle?: React.CSSProperties;
-
-  /**
-   * you can custom `connector` style.
-   */
-  connectorStyle?: React.CSSProperties;
-
-  /**
-   * you can custom `container` style.
-   */
-  containerMinHeight?: number;
-
-  /**
-   * you can custom `container` height.
-   */
-  containerHeight?: number;
+  disabled?: boolean;
 
   /**
    * you can custom `container` min height.

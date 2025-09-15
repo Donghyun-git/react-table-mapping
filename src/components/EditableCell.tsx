@@ -9,6 +9,7 @@ import { useSourceFields, useTargetFields } from '@/contexts';
 export interface EditableCellProps {
   fieldId: string;
   fieldKey: string;
+  disabled?: boolean;
   params:
     | {
         type: 'string';
@@ -39,7 +40,7 @@ export interface EditableCellProps {
     | string;
 }
 
-const EditableCell = memo(({ fieldId, fieldKey, params }: EditableCellProps) => {
+const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true }: EditableCellProps) => {
   const [localValue, setLocalValue] = useState(() => {
     if (typeof params === 'string') return params;
 
@@ -136,7 +137,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params }: EditableCellProps) => 
   );
 
   if (typeof params === 'string') {
-    return <div className="custom-cell-text ">{params}</div>;
+    return <div className="custom-cell-text">{params}</div>;
   }
 
   if (params.type === 'input') {
@@ -147,6 +148,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params }: EditableCellProps) => 
           {...params.attributes}
           ref={inputRef as React.RefObject<HTMLInputElement>}
           onChange={handleInputChange}
+          disabled={disabled}
         />
       </div>
     );
@@ -156,7 +158,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params }: EditableCellProps) => 
     return (
       <div className="custom-cell-select">
         <Select value={localValue} onValueChange={handleSelectChange}>
-          <SelectTrigger>
+          <SelectTrigger disabled={disabled}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

@@ -4,6 +4,7 @@ import MappingLines from '@/components/MappingLines';
 import SourceTable from '@/components/SourceTable';
 import TargetTable from '@/components/TargetTable';
 import { useMappings, useTargetFields } from '@/contexts';
+import useTableMapping from '@/hooks/useTableMapping';
 import { type TableMappingProps } from '@/types/table-mapping';
 import { SvgLineExtractor } from '@/utils';
 
@@ -16,17 +17,21 @@ function TableMapping({
   lineType = 'straight',
   lineColor = '#009bff',
   lineWidth = 1.5,
-  containerHeight: containerHeightProps = 400,
   hoverLineColor = '#e3f3ff',
+  disabled = false,
+  noDataComponent,
+  afterSourceFieldRemove,
+  afterTargetFieldRemove,
   onMappingChange,
 }: TableMappingProps) {
   const { mappings, addMapping, removeMapping, updateMappings } = useMappings();
-
+  const { redraw, redrawCount } = useTableMapping();
   const { targetFields } = useTargetFields();
 
   const svgRef = useRef<SVGSVGElement>(null);
   const sourceTableRef = useRef<HTMLDivElement>(null);
   const targetTableRef = useRef<HTMLDivElement>(null);
+  const mappingContainerRef = useRef<HTMLDivElement>(null);
 
   /**
    * hovering mapping id
@@ -36,7 +41,7 @@ function TableMapping({
   /**
    * personal instance of container Height
    */
-  const [containerHeight, setContainerHeight] = useState<number>(containerHeightProps);
+  const [containerHeight, setContainerHeight] = useState<number>(0);
 
   /**
    * dragging state
@@ -57,24 +62,24 @@ function TableMapping({
     currentY: 0,
   });
 
-  const [forceUpdate, setForceUpdate] = useState<number>(0);
-
   const handleResize = () => {
-    setForceUpdate((prev) => prev + 1);
+    redraw();
   };
 
   /**
    * start dragging from source connector
    */
   const handleDragStart = (e: React.MouseEvent, sourceId: string) => {
+    const containerRect = mappingContainerRef.current?.getBoundingClientRect();
+
+    if (!containerRect) return;
+
     // calculate connector position
-    const sourceEl = document.getElementById(`connector-${sourceId}`);
+    const sourceEl = mappingContainerRef.current?.querySelector(`#connector-source-${sourceId}`);
+
     if (!sourceEl) return;
 
     const rect = sourceEl.getBoundingClientRect();
-    const containerRect = document.querySelector('.mapping-container')?.getBoundingClientRect();
-
-    if (!containerRect) return;
 
     // calculate relative position based on container
     const startX = rect.right - containerRect.left;
@@ -100,6 +105,7 @@ function TableMapping({
     if (!dragging.active) return;
 
     const svgRect = svgRef.current?.getBoundingClientRect();
+
     if (!svgRect) return;
 
     const currentX = e.clientX - svgRect.left;
@@ -121,9 +127,15 @@ function TableMapping({
   const handleDragEnd = (e: React.MouseEvent) => {
     if (!dragging.active) return;
 
+    const containerRect = mappingContainerRef.current?.getBoundingClientRect();
+
+    if (!containerRect) return;
+
     const svgRect = svgRef.current?.getBoundingClientRect();
+
     if (!svgRect) {
       setDragging({ ...dragging, active: false });
+
       return;
     }
 
@@ -131,7 +143,8 @@ function TableMapping({
     const currentY = e.clientY - svgRect.top;
 
     for (const targetField of targetFields) {
-      const targetEl = document.getElementById(`connector-${targetField.id}`);
+      const targetEl = mappingContainerRef.current?.querySelector(`#connector-target-${targetField.id}`);
+
       if (!targetEl) continue;
 
       const rect = targetEl.getBoundingClientRect();
@@ -163,16 +176,17 @@ function TableMapping({
    */
   const createPath = useCallback(
     (sourceId: string, targetId: string) => {
-      const sourceEl = document.getElementById(`connector-${sourceId}`);
-      const targetEl = document.getElementById(`connector-${targetId}`);
+      const containerRect = mappingContainerRef.current?.getBoundingClientRect();
+
+      if (!containerRect) return null;
+
+      const sourceEl = mappingContainerRef.current?.querySelector(`#connector-source-${sourceId}`);
+      const targetEl = mappingContainerRef.current?.querySelector(`#connector-target-${targetId}`);
 
       if (!sourceEl || !targetEl || !svgRef.current) return null;
 
       const sourceRect = sourceEl.getBoundingClientRect();
       const targetRect = targetEl.getBoundingClientRect();
-      const containerRect = document.querySelector('.mapping-container')?.getBoundingClientRect();
-
-      if (!containerRect) return null;
 
       const startX = sourceRect.right - containerRect.left;
       const startY = sourceRect.top + sourceRect.height / 2 - containerRect.top;
@@ -244,6 +258,7 @@ function TableMapping({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -254,7 +269,7 @@ function TableMapping({
       const renderTimer = setTimeout(() => {
         updateMappings(initialMappings);
 
-        setForceUpdate((prev) => prev + 1);
+        redraw();
       }, 100);
 
       return () => clearTimeout(renderTimer);
@@ -265,6 +280,7 @@ function TableMapping({
   return (
     <div className="react-table-mapping">
       <div
+        ref={mappingContainerRef}
         className="mapping-container"
         style={{
           minHeight: `${containerHeight}px`,
@@ -275,7 +291,10 @@ function TableMapping({
           sourceTableRef={sourceTableRef}
           sources={sources}
           sourceColumns={sourceColumns}
+          disabled={disabled}
+          noDataComponent={noDataComponent}
           handleDragStart={handleDragStart}
+          afterSourceFieldRemove={afterSourceFieldRemove}
         />
 
         {/* SVG mapping line - add key property to force re-render when resizing */}
@@ -285,7 +304,10 @@ function TableMapping({
           style={{ minHeight: `${containerHeight}px` }}
           onMouseMove={handleDrag}
           onMouseUp={handleDragEnd}
-          onMouseLeave={handleDragEnd}
+          onMouseLeave={(e) => {
+            handleDragEnd(e);
+            setHoveredMapping(null);
+          }}
         >
           {/* mapping line */}
           <MappingLines
@@ -294,11 +316,12 @@ function TableMapping({
             lineColor={lineColor}
             lineWidth={lineWidth}
             hoverLineColor={hoverLineColor}
-            removeMapping={removeMapping}
-            forceUpdate={forceUpdate}
+            forceUpdate={redrawCount}
             hoveredMapping={hoveredMapping}
-            setHoveredMapping={setHoveredMapping}
             isDragging={dragging?.active}
+            disabled={disabled}
+            removeMapping={removeMapping}
+            setHoveredMapping={setHoveredMapping}
           />
 
           {/* dragging line */}
@@ -349,7 +372,14 @@ function TableMapping({
         </svg>
 
         {/* target table */}
-        <TargetTable targetTableRef={targetTableRef} targets={targets} targetColumns={targetColumns} />
+        <TargetTable
+          targetTableRef={targetTableRef}
+          targets={targets}
+          targetColumns={targetColumns}
+          disabled={disabled}
+          noDataComponent={noDataComponent}
+          afterTargetFieldRemove={afterTargetFieldRemove}
+        />
       </div>
     </div>
   );

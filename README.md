@@ -1,7 +1,23 @@
 # React Table Mapping
 
-1. In `v1.0.0-beta.9`, remove tailwind dependencies and migrated pure css.
-2. In `v1.0.0-beta.10`, fix maximum rerender problem and container height resize problem.
+## 📋 Changelog
+
+### Version 1.0.0-beta.11
+
+- `containerHeight` & `containerMinHeight` props have been deprecated.
+- Enhanced line hover state for better user experience.
+- `disabled` state support for read-only scenarios.
+- Fixed mapping ui in multiple TableMapping Component.
+
+### Version 1.0.0-beta.10
+
+- Maximum re-render problem resolved.
+- Container height resize issue fixed for better responsiveness.
+
+### Version 1.0.0-beta.9
+
+- Tailwind dependencies completely removed.
+- Transitioned to pure CSS for better performance and smaller bundle size.
 
 ## 📺 DEMO
 
@@ -100,7 +116,7 @@ function App() {
       func: {
         type: 'select',
         columnKey: 'func',
-        value: 'NONE',
+        defaultValue: 'NONE',
         options: [
           { label: 'NONE', value: 'NONE' },
           { label: 'CONCAT', value: 'CONCAT' },
@@ -248,7 +264,7 @@ Dropdown selection with options:
   func: {
     type: 'select',
     columnKey: 'func',
-    value: 'CONCAT',
+    defaultValue: 'CONCAT',
     options: [
       { label: 'None', value: 'NONE' },
       { label: 'Concatenate', value: 'CONCAT' },

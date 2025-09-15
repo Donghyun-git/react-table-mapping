@@ -5,8 +5,8 @@ import type { FieldItem, TableMappingProps } from '@/types/table-mapping';
 const generateSourceFields = ({ sources }: Pick<TableMappingProps, 'sources'>): FieldItem[] => {
   return (sources?.map((source) => ({
     ...source,
-    id: source.id ? source.id : `source-${uuidv4()}`,
-    key: source.key ? source.key : `source-${uuidv4()}`,
+    id: source.id ? source.id : `${uuidv4()}`,
+    key: source.key ? source.key : `${uuidv4()}`,
   })) ?? []) as FieldItem[];
 };
 

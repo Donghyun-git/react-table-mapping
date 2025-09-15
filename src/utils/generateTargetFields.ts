@@ -5,8 +5,8 @@ import type { FieldItem, TableMappingProps } from '@/types/table-mapping';
 const generateTargetFields = ({ targets }: Pick<TableMappingProps, 'targets'>): FieldItem[] => {
   return (targets?.map((target) => ({
     ...target,
-    id: target.id ? target.id : `target-${uuidv4()}`,
-    key: target.key ? target.key : `target-${uuidv4()}`,
+    id: target.id ? target.id : `${uuidv4()}`,
+    key: target.key ? target.key : `${uuidv4()}`,
   })) ?? []) as FieldItem[];
 };
 

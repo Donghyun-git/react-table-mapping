@@ -31,14 +31,13 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'mjs' : 'js'}`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', 'uuid', 'lodash'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'uuid'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           'react/jsx-runtime': 'jsxRuntime',
           uuid: 'uuid',
-          lodash: 'lodash',
         },
         assetFileNames: (assetInfo: PreRenderedAsset): string => {
           if (assetInfo.name === 'style.css') {

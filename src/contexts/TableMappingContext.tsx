@@ -93,6 +93,11 @@ export const useTargetFields = () =>
 export const useMappings = () =>
   useTableMappingSelector((ctx) => ({
     /**
+     * you can redraw the table mapping.
+     */
+    redraw: ctx.redraw,
+
+    /**
      * you can get current mappings.
      */
     mappings: ctx.getMappings(),

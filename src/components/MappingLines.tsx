@@ -14,6 +14,7 @@ export interface MappingLinesProps {
   hoveredMapping: string | null;
   setHoveredMapping: (id: string | null) => void;
   isDragging: boolean;
+  disabled: boolean;
 }
 
 const MappingLines = memo(
@@ -28,6 +29,7 @@ const MappingLines = memo(
     hoveredMapping,
     setHoveredMapping,
     isDragging,
+    disabled,
   }: MappingLinesProps) => {
     const effectiveHoveredMapping = isDragging ? null : hoveredMapping;
 
@@ -42,9 +44,10 @@ const MappingLines = memo(
           return pathData ? (
             <g
               key={`${mapping.id}-${forceUpdate}`}
+              style={{ pointerEvents: disabled ? 'none' : 'auto' }}
               className="mapping-line-group"
-              onMouseEnter={() => !isDragging && setHoveredMapping(mapping.id)}
-              onMouseLeave={() => !isDragging && setHoveredMapping(null)}
+              onMouseEnter={() => !isDragging && !disabled && setHoveredMapping(mapping.id)}
+              onMouseLeave={() => !isDragging && !disabled && setHoveredMapping(null)}
             >
               {/* actual view line */}
               <path
@@ -59,9 +62,10 @@ const MappingLines = memo(
               {/* hover area */}
               <path
                 d={pathData.path}
+                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                 strokeWidth={lineWidth + 4}
-                className={`hover-area ${isDragging ? 'dragging' : ''}`}
-                onClick={() => !isDragging && removeMapping(mapping.id)}
+                className={`hover-area ${isDragging && !disabled ? 'dragging' : ''}`}
+                onClick={() => !isDragging && !disabled && removeMapping(mapping.id)}
               />
             </g>
           ) : null;
@@ -75,8 +79,8 @@ const MappingLines = memo(
               <g
                 key={`${hoveredMappingData.id}-${forceUpdate}-hovered`}
                 className="mapping-line-group hovered"
-                onMouseEnter={() => !isDragging && setHoveredMapping(hoveredMappingData.id)}
-                onMouseLeave={() => !isDragging && setHoveredMapping(null)}
+                onMouseEnter={() => !isDragging && !disabled && setHoveredMapping(hoveredMappingData.id)}
+                onMouseLeave={() => !isDragging && !disabled && setHoveredMapping(null)}
               >
                 {/* actual view line */}
                 <path
@@ -92,8 +96,8 @@ const MappingLines = memo(
                 <path
                   d={pathData.path}
                   strokeWidth={lineWidth + 4.5}
-                  className={`hover-area ${isDragging ? 'dragging' : ''}`}
-                  onClick={() => !isDragging && removeMapping(hoveredMappingData.id)}
+                  className={`hover-area ${isDragging && !disabled ? 'dragging' : ''}`}
+                  onClick={() => !isDragging && !disabled && removeMapping(hoveredMappingData.id)}
                 />
 
                 <foreignObject
@@ -102,7 +106,7 @@ const MappingLines = memo(
                   x={pathData.midX - 9}
                   y={pathData.midY - 9}
                   style={{ overflow: 'visible' }}
-                  onClick={() => !isDragging && removeMapping(hoveredMappingData.id)}
+                  onClick={() => !isDragging && !disabled && removeMapping(hoveredMappingData.id)}
                 >
                   <div className={`mapping-delete-button ${isDragging ? 'dragging' : ''}`}>
                     <X className="mapping-delete-icon" />
