@@ -46,6 +46,7 @@ const TargetRow = memo(({ field, disabled }: { field: FieldItem; disabled?: bool
 
       <div
         id={`connector-target-${id}`}
+        data-testid={`connector-target-${id}`}
         className="target-connector connector"
         style={{ cursor: disabled ? 'not-allowed' : 'pointer', pointerEvents: disabled ? 'none' : 'auto' }}
       />

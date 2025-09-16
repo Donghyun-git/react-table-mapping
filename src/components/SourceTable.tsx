@@ -57,6 +57,7 @@ const SourceRow = memo(
         })}
         <div
           id={`connector-source-${id}`}
+          data-testid={`connector-source-${id}`}
           className="source-connector connector"
           style={{ cursor: disabled ? 'not-allowed' : 'pointer', pointerEvents: disabled ? 'none' : 'auto' }}
           onMouseDown={(e) => !disabled && handleDragStart(e, id)}

@@ -28,8 +28,9 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc -b && vite build",
-    "build:lib": "rm -rf dist && vite build",
+    "build:lib": "rm -rf dist && NODE_ENV=publish vite build",
     "build:types": "tsc --project tsconfig.lib.json",
+    "build:lib:analyze": "rm -rf dist && NODE_ENV=publish ANALYZE=true vite build",
     "lint": "eslint --fix",
     "lint:check": "eslint .",
     "format": "prettier --write .",
@@ -39,6 +40,11 @@
     "prepublishOnly": "npm run build:lib",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "prepare": "husky"
   },
   "dependencies": {
@@ -51,6 +57,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@playwright/test": "^1.55.0",
     "@storybook/addon-docs": "^9.1.0",
     "@storybook/addon-themes": "^9.1.0",
     "@storybook/react-vite": "^9.1.0",
@@ -59,6 +66,7 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "babel-plugin-jsx-remove-data-test-id": "^3.0.0",
     "es-toolkit": "^1.37.2",
     "eslint": "^9.22.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -68,6 +76,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.5.1",
     "prettier": "^3.5.3",
+    "rollup-plugin-visualizer": "^6.0.3",
     "storybook": "^9.1.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",

@@ -46,6 +46,7 @@ const MappingLines = memo(
               key={`${mapping.id}-${forceUpdate}`}
               style={{ pointerEvents: disabled ? 'none' : 'auto' }}
               className="mapping-line-group"
+              data-testid={`mapping-line-${mapping.id}`}
               onMouseEnter={() => !isDragging && !disabled && setHoveredMapping(mapping.id)}
               onMouseLeave={() => !isDragging && !disabled && setHoveredMapping(null)}
             >
@@ -79,6 +80,7 @@ const MappingLines = memo(
               <g
                 key={`${hoveredMappingData.id}-${forceUpdate}-hovered`}
                 className="mapping-line-group hovered"
+                data-testid={`mapping-line-${hoveredMappingData.id}`}
                 onMouseEnter={() => !isDragging && !disabled && setHoveredMapping(hoveredMappingData.id)}
                 onMouseLeave={() => !isDragging && !disabled && setHoveredMapping(null)}
               >
