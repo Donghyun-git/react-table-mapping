@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import MappingLines from '@/components/MappingLines';
 import SourceTable from '@/components/SourceTable';
 import TargetTable from '@/components/TargetTable';
-import { useMappings, useTargetFields } from '@/contexts';
+import { useMappings, useSourceFields, useTargetFields } from '@/contexts';
 import useTableMapping from '@/hooks/useTableMapping';
 import { type TableMappingProps } from '@/types/table-mapping';
 import { SvgLineExtractor } from '@/utils';
@@ -26,6 +26,8 @@ function TableMapping({
 }: TableMappingProps) {
   const { mappings, addMapping, removeMapping, updateMappings } = useMappings();
   const { redraw, redrawCount } = useTableMapping();
+
+  const { sourceFields } = useSourceFields();
   const { targetFields } = useTargetFields();
 
   const svgRef = useRef<SVGSVGElement>(null);
@@ -210,10 +212,10 @@ function TableMapping({
 
   useEffect(() => {
     if (onMappingChange) {
-      onMappingChange(mappings);
+      onMappingChange({ sources: sourceFields, targets: targetFields, mappings });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappings]);
+  }, [mappings, sources, targets]);
 
   //mutation observer effect
   useEffect(() => {

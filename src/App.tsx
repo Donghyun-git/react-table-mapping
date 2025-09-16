@@ -165,6 +165,9 @@ function App() {
           sourceColumns={sourceColumns}
           targetColumns={targetColumns}
           initialMappings={initialMappings}
+          onMappingChange={(mappings) => {
+            console.info('mappings', mappings);
+          }}
         />
       </div>
     </TableMappingProvider>
