@@ -283,7 +283,7 @@ function TableMapping({
         ref={mappingContainerRef}
         className="mapping-container"
         style={{
-          minHeight: `${containerHeight}px`,
+          minHeight: containerHeight !== 0 && containerHeight > 180 ? `${containerHeight}px` : '180px',
         }}
       >
         {/* source table */}
@@ -301,7 +301,9 @@ function TableMapping({
         <svg
           ref={svgRef}
           className="mapping-svg"
-          style={{ minHeight: `${containerHeight}px` }}
+          style={{
+            minHeight: containerHeight !== 0 && containerHeight > 180 ? `${containerHeight}px` : '180px',
+          }}
           onMouseMove={handleDrag}
           onMouseUp={handleDragEnd}
           onMouseLeave={(e) => {
