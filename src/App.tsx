@@ -1,15 +1,8 @@
 import TableMapping from '@/components/TableMapping';
-import { useMappings, useSourceFields, useTargetFields } from '@/contexts';
+import { TableMappingProvider } from '@/contexts';
 import type { FieldItemInput } from '@/types/table-mapping';
 
 function App() {
-  const { sourceFields: currentSourceFields, appendSourceField } = useSourceFields();
-  const { targetFields: currentTargetFields, appendTargetField } = useTargetFields();
-
-  const { mappings } = useMappings();
-
-  console.log('useMappings hook [ mappings ]  =>', mappings);
-
   const sourceColumns = [{ title: 'Name', key: 'name' }];
 
   const targetColumns = [
@@ -21,115 +14,163 @@ function App() {
   const sourceFields = [
     {
       name: {
-        type: 'input',
+        type: 'string',
         columnKey: 'name',
-        value: 'table2field',
+        value: 'KEY',
       },
       id: '0',
       key: '0',
     },
     {
       name: {
-        type: 'input',
+        type: 'string',
         columnKey: 'name',
-        value: 'table2field',
+        value: 'COL1',
       },
       id: '1',
       key: '1',
+    },
+    {
+      name: {
+        type: 'string',
+        columnKey: 'name',
+        value: 'COL2',
+      },
+      id: '2',
+      key: '2',
+    },
+    {
+      name: {
+        type: 'string',
+        columnKey: 'name',
+        value: 'COL3',
+      },
+      id: '3',
+      key: '3',
+    },
+    {
+      name: {
+        type: 'string',
+        columnKey: 'name',
+        value: 'COL4',
+      },
+      id: '4',
+      key: '4',
     },
   ] satisfies FieldItemInput[];
 
   const targetFields = [
     {
+      id: '0',
+      key: '0',
       name: {
         type: 'input',
         columnKey: 'name',
-        value: 'table2field',
+        value: 'KEY',
+        onChange: (value) => console.log('target name changed:', value),
       },
       data: {
         type: 'input',
         columnKey: 'data',
-        value: 'table2field',
+        value: '',
+        onChange: (value) => console.log('target data changed:', value),
       },
       func: {
         type: 'select',
         columnKey: 'func',
-        defaultValue: 'NONE',
+        value: 'NONE',
         options: [
-          {
-            label: 'NONE',
-            value: 'NONE',
-          },
-          {
-            label: 'CONCAT',
-            value: 'CONCAT',
-          },
-          {
-            label: 'SUM',
-            value: 'SUM',
-          },
+          { label: 'NONE', value: 'NONE' },
+          { label: 'CONCAT', value: 'CONCAT' },
+          { label: 'SUM', value: 'SUM' },
         ],
+        onChange: (value) => console.log('target func changed:', value),
       },
-      id: '0',
-      key: '0',
+    },
+    {
+      id: '1',
+      key: '1',
+      name: {
+        type: 'input',
+        columnKey: 'name',
+        value: 'CONCAT_COL',
+        onChange: (value) => console.log('target name changed:', value),
+      },
+      data: {
+        type: 'input',
+        columnKey: 'data',
+        value: 'CONCAT(COL1,COL2)',
+        onChange: (value) => console.log('target data changed:', value),
+      },
+      func: {
+        type: 'select',
+        columnKey: 'func',
+        value: 'CONCAT',
+        options: [
+          { label: 'NONE', value: 'NONE' },
+          { label: 'CONCAT', value: 'CONCAT' },
+          { label: 'SUM', value: 'SUM' },
+        ],
+        onChange: (value) => console.log('target func changed:', value),
+      },
+    },
+    {
+      id: '2',
+      key: '2',
+      name: {
+        type: 'input',
+        columnKey: 'name',
+        value: 'SUM_COL',
+        onChange: (value) => console.log('target name changed:', value),
+      },
+      data: {
+        type: 'input',
+        columnKey: 'data',
+        value: 'SUM(,)',
+        onChange: (value) => console.log('target data changed:', value),
+      },
+      func: {
+        type: 'select',
+        columnKey: 'func',
+        value: 'SUM',
+        options: [
+          { label: 'NONE', value: 'NONE' },
+          { label: 'CONCAT', value: 'CONCAT' },
+          { label: 'SUM', value: 'SUM' },
+        ],
+        onChange: (value) => console.log('target func changed:', value),
+      },
     },
   ] satisfies FieldItemInput[];
 
   const initialMappings = [
     {
-      id: 'mapping-0-0',
-      source: '0',
-      target: '0',
+      id: 'mapping-4-2',
+      source: '4',
+      target: '2',
     },
   ];
 
   return (
-    <div style={{ height: '100vh' }}>
-      <button
-        onClick={() => {
-          appendSourceField({
-            name: {
-              type: 'string',
-              columnKey: 'name',
-              value: `COL${currentSourceFields.length + 1}`,
-            },
-            id: `${currentSourceFields.length + 1}`,
-            key: `${currentSourceFields.length + 1}`,
-          });
+    <TableMappingProvider>
+      <div
+        style={{
+          height: '400px',
         }}
       >
-        소스 추가
-      </button>
-      <button
-        onClick={() => {
-          appendTargetField({
-            name: {
-              type: 'string',
-              columnKey: 'name',
-              value: `COL${currentTargetFields.length + 1}`,
-            },
-            id: `${currentTargetFields.length + 1}`,
-            key: `${currentTargetFields.length + 1}`,
-          });
-        }}
-      >
-        타겟 추가
-      </button>
-      <TableMapping
-        lineType="bezier"
-        sources={sourceFields}
-        targets={targetFields}
-        sourceColumns={sourceColumns}
-        targetColumns={targetColumns}
-        initialMappings={initialMappings}
-        afterSourceFieldRemove={(id) => {
-          alert(`${id} removed`);
-        }}
-        afterTargetFieldRemove={(id) => {
-          alert(`${id} removed`);
-        }}
-      />
-    </div>
+        <TableMapping
+          lineType="bezier"
+          sources={sourceFields}
+          targets={targetFields}
+          sourceColumns={sourceColumns}
+          targetColumns={targetColumns}
+          initialMappings={initialMappings}
+          onMappingChange={(mappings) => {
+            console.info('mappings', mappings);
+          }}
+        />
+      </div>
+    </TableMappingProvider>
   );
 }
 

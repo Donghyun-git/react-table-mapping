@@ -2,15 +2,33 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import path from 'path';
 import type { PreRenderedAsset } from 'rollup';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
+const isLibraryBuild = process.env.NODE_ENV === 'publish';
+const shouldAnalyze = process.env.ANALYZE === 'true';
+
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: isLibraryBuild
+          ? [
+              [
+                'babel-plugin-jsx-remove-data-test-id',
+                {
+                  attributes: ['data-testid'],
+                },
+              ],
+            ]
+          : [],
+      },
+    }),
     dts({
       insertTypesEntry: true,
       exclude: [
+        'e2e/**/*',
         'stories/**/*',
         'src/main.tsx',
         'src/App.tsx',
@@ -22,6 +40,15 @@ export default defineConfig({
       ],
       tsconfigPath: './tsconfig.lib.json',
     }),
+    shouldAnalyze &&
+      isLibraryBuild &&
+      visualizer({
+        filename: 'dist/bundle-analysis.html',
+        open: true,
+        gzipSize: true,
+        brotliSize: true,
+        template: 'treemap',
+      }),
   ],
   build: {
     lib: {

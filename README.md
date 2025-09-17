@@ -147,6 +147,10 @@ function App() {
         sources={sourceFields}
         targets={targetFields}
         initialMappings={initialMappings}
+        onMappingChange={(mappings) => {
+          // you can get mappings, sources, targets
+          console.info('mappings', mappings);
+        }}
       />
     </TableMappingProvider>
   );

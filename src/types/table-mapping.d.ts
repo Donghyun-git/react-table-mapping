@@ -169,8 +169,17 @@ interface TableMappingProps {
 
   /**
    * if mapping, `onMappingChange` return current Mapping states.
+   * @param sources
+   * @param targets
    * @param mappings
-   * @returns
    */
-  onMappingChange?: (mappings: Mapping[]) => void;
+  onMappingChange?: ({
+    sources,
+    targets,
+    mappings,
+  }: {
+    sources: FieldItemInput[];
+    targets: FieldItemInput[];
+    mappings: Mapping[];
+  }) => void;
 }
