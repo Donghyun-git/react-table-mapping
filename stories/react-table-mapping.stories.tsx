@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import TableMapping from '@/components/TableMapping';
+import TableMapping from '@/components/TableMapping/TableMappingContainer';
 import { TableMappingProvider } from '@/contexts';
 import '@/lib/system.css';
 
@@ -48,20 +48,6 @@ const meta = {
       },
       description: 'Color when hovering over lines',
       defaultValue: '#e3f3ff',
-    },
-    containerMinHeight: {
-      control: {
-        type: 'number',
-      },
-      description: 'Minimum height of the container',
-      defaultValue: 400,
-    },
-    containerHeight: {
-      control: {
-        type: 'number',
-      },
-      description: 'Height of the container',
-      defaultValue: 400,
     },
   },
   decorators: [
@@ -215,7 +201,7 @@ export const Demo_BezierLines: Story = {
         },
       },
     ],
-    initialMappings: [
+    mappings: [
       {
         id: 'mapping-source-0-target-0',
         source: 'source-0',

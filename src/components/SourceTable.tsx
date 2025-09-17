@@ -1,21 +1,20 @@
 import { MinusIcon } from 'lucide-react';
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 
 import EditableCell from '@/components/EditableCell';
 import { Button } from '@/components/ui/button';
 import { useMappings, useSourceFields } from '@/contexts';
-import type { FieldItem, FieldItemInput, HeaderColumnProps } from '@/types/table-mapping';
-import { generateSourceFields } from '@/utils';
+import type { FieldItem, HeaderColumnProps } from '@/types/table-mapping';
 
 import NoData from './ui/nodata';
 
 interface SourceTableProps {
   sourceTableRef: React.RefObject<HTMLDivElement | null>;
-  sources: FieldItemInput[];
   sourceColumns: Array<Omit<HeaderColumnProps, 'type'>>;
   disabled?: boolean;
   noDataComponent?: React.ReactNode;
-  afterSourceFieldRemove?: (removedSourceId: string) => void;
+  onBeforeSourceFieldRemove?: (sourceId: string) => void | boolean;
+  onAfterSourceFieldRemove?: (removedSourceId: string) => void;
   handleDragStart: (e: React.MouseEvent, sourceId: string) => void;
 }
 
@@ -50,6 +49,7 @@ const SourceRow = memo(
                 fieldKey={fieldKey}
                 params={params}
                 disabled={disabled}
+                tableType="source"
               />
             );
           }
@@ -71,13 +71,24 @@ const SourceRow = memo(
  * main source table component
  */
 const SourceTable = (props: SourceTableProps) => {
-  const { sourceTableRef, sources, sourceColumns, disabled, noDataComponent, afterSourceFieldRemove, handleDragStart } =
-    props;
+  const {
+    sourceTableRef,
+    sourceColumns,
+    disabled,
+    noDataComponent,
+    onBeforeSourceFieldRemove,
+    onAfterSourceFieldRemove,
+    handleDragStart,
+  } = props;
 
-  const { sourceFields, removeSourceField, updateSourceFields } = useSourceFields();
+  const { sourceFields, removeSourceField } = useSourceFields();
   const { mappings, removeMapping, redraw } = useMappings();
 
   const handleSourceFieldRemove = (sourceId: string) => {
+    const shouldRemove = onBeforeSourceFieldRemove?.(sourceId);
+
+    if (shouldRemove === false) return;
+
     const relatedMappings = mappings.filter((mapping) => mapping.source === sourceId);
 
     relatedMappings.forEach((mapping) => {
@@ -86,22 +97,12 @@ const SourceTable = (props: SourceTableProps) => {
 
     removeSourceField(sourceId);
 
-    afterSourceFieldRemove?.(sourceId);
+    onAfterSourceFieldRemove?.(sourceId);
 
     setTimeout(() => {
       redraw();
     }, 50);
   };
-
-  /**
-   * initial data setup
-   */
-  useEffect(() => {
-    const initialFields = generateSourceFields({ sources });
-
-    updateSourceFields(initialFields);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div ref={sourceTableRef} className="source-table">

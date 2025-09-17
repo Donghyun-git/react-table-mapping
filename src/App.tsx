@@ -1,5 +1,4 @@
-import TableMapping from '@/components/TableMapping';
-import { TableMappingProvider } from '@/contexts';
+import { TableMapping } from '@/components/TableMapping';
 import type { FieldItemInput } from '@/types/table-mapping';
 
 function App() {
@@ -152,25 +151,23 @@ function App() {
   ];
 
   return (
-    <TableMappingProvider>
-      <div
-        style={{
-          height: '400px',
+    <div
+      style={{
+        height: '400px',
+      }}
+    >
+      <TableMapping
+        lineType="bezier"
+        sources={sourceFields}
+        targets={targetFields}
+        sourceColumns={sourceColumns}
+        targetColumns={targetColumns}
+        mappings={initialMappings}
+        onMappingChange={(mappings) => {
+          console.info('mappings', mappings);
         }}
-      >
-        <TableMapping
-          lineType="bezier"
-          sources={sourceFields}
-          targets={targetFields}
-          sourceColumns={sourceColumns}
-          targetColumns={targetColumns}
-          initialMappings={initialMappings}
-          onMappingChange={(mappings) => {
-            console.info('mappings', mappings);
-          }}
-        />
-      </div>
-    </TableMappingProvider>
+      />
+    </div>
   );
 }
 

@@ -1,21 +1,20 @@
 import { MinusIcon } from 'lucide-react';
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 
 import EditableCell from '@/components/EditableCell';
 import { useMappings, useTargetFields } from '@/contexts';
-import type { FieldItem, FieldItemInput, HeaderColumnProps } from '@/types/table-mapping';
-import { generateTargetFields } from '@/utils';
+import type { FieldItem, HeaderColumnProps } from '@/types/table-mapping';
 
 import { Button } from './ui/button';
 import NoData from './ui/nodata';
 
 interface TargetTableProps {
   targetTableRef: React.RefObject<HTMLDivElement | null>;
-  targets: FieldItemInput[];
   targetColumns: Array<Omit<HeaderColumnProps, 'type'>>;
   disabled: boolean;
   noDataComponent?: React.ReactNode;
-  afterTargetFieldRemove?: (removedTargetId: string) => void;
+  onBeforeTargetFieldRemove?: (targetId: string) => void | boolean;
+  onAfterTargetFieldRemove?: (removedTargetId: string) => void;
 }
 
 const TargetRow = memo(({ field, disabled }: { field: FieldItem; disabled?: boolean }) => {
@@ -37,6 +36,7 @@ const TargetRow = memo(({ field, disabled }: { field: FieldItem; disabled?: bool
               fieldKey={fieldKey}
               params={params}
               disabled={disabled}
+              tableType="target"
             />
           );
         }
@@ -55,12 +55,23 @@ const TargetRow = memo(({ field, disabled }: { field: FieldItem; disabled?: bool
 });
 
 const TargetTable = (props: TargetTableProps) => {
-  const { targetTableRef, targets, targetColumns, disabled, noDataComponent, afterTargetFieldRemove } = props;
+  const {
+    targetTableRef,
+    targetColumns,
+    disabled,
+    noDataComponent,
+    onBeforeTargetFieldRemove,
+    onAfterTargetFieldRemove,
+  } = props;
 
-  const { targetFields, removeTargetField, updateTargetFields } = useTargetFields();
+  const { targetFields, removeTargetField } = useTargetFields();
   const { mappings, removeMapping, redraw } = useMappings();
 
   const handleTargetFieldRemove = (targetId: string) => {
+    const shouldRemove = onBeforeTargetFieldRemove?.(targetId);
+
+    if (shouldRemove === false) return;
+
     const relatedMappings = mappings.filter((mapping) => mapping.target === targetId);
 
     relatedMappings.forEach((mapping) => {
@@ -69,19 +80,12 @@ const TargetTable = (props: TargetTableProps) => {
 
     removeTargetField(targetId);
 
-    afterTargetFieldRemove?.(targetId);
+    onAfterTargetFieldRemove?.(targetId);
 
     setTimeout(() => {
       redraw();
     }, 50);
   };
-
-  useEffect(() => {
-    const initialFields = generateTargetFields({ targets });
-
-    updateTargetFields(initialFields);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div ref={targetTableRef} className="target-table">
