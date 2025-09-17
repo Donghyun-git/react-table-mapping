@@ -4,14 +4,10 @@ import MappingLines from '@/components/MappingLines';
 import SourceTable from '@/components/SourceTable';
 import TargetTable from '@/components/TargetTable';
 import { useMappings, useSourceFields, useTargetFields } from '@/contexts';
-import useTableMapping from '@/hooks/useTableMapping';
 import { type TableMappingProps } from '@/types/table-mapping';
 import { SvgLineExtractor } from '@/utils';
 
 function TableMapping({
-  sources = [],
-  targets = [],
-  initialMappings = [],
   sourceColumns = [],
   targetColumns = [],
   lineType = 'straight',
@@ -20,12 +16,16 @@ function TableMapping({
   hoverLineColor = '#e3f3ff',
   disabled = false,
   noDataComponent,
-  afterSourceFieldRemove,
-  afterTargetFieldRemove,
+  onBeforeSourceFieldRemove,
+  onBeforeTargetFieldRemove,
+  onAfterSourceFieldRemove,
+  onAfterTargetFieldRemove,
+  onAfterMappingLineRemove,
+  onBeforeMappingLineRemove,
+  onAfterMappingChange,
   onMappingChange,
-}: TableMappingProps) {
-  const { mappings, addMapping, removeMapping, updateMappings } = useMappings();
-  const { redraw, redrawCount } = useTableMapping();
+}: Omit<TableMappingProps, 'sources' | 'targets' | 'mappings'>) {
+  const { mappings, redrawCount, redraw, addMapping, removeMapping } = useMappings();
 
   const { sourceFields } = useSourceFields();
   const { targetFields } = useTargetFields();
@@ -215,7 +215,14 @@ function TableMapping({
       onMappingChange({ sources: sourceFields, targets: targetFields, mappings });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappings, sources, targets]);
+  }, [mappings, sourceFields, targetFields]);
+
+  useEffect(() => {
+    if (onAfterMappingChange) {
+      onAfterMappingChange({ sources: sourceFields, targets: targetFields, mappings });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mappings]);
 
   //mutation observer effect
   useEffect(() => {
@@ -263,22 +270,6 @@ function TableMapping({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /**
-   * initial mappings
-   */
-  useEffect(() => {
-    if (initialMappings.length > 0) {
-      const renderTimer = setTimeout(() => {
-        updateMappings(initialMappings);
-
-        redraw();
-      }, 100);
-
-      return () => clearTimeout(renderTimer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <div className="react-table-mapping">
       <div
@@ -291,12 +282,12 @@ function TableMapping({
         {/* source table */}
         <SourceTable
           sourceTableRef={sourceTableRef}
-          sources={sources}
           sourceColumns={sourceColumns}
           disabled={disabled}
           noDataComponent={noDataComponent}
           handleDragStart={handleDragStart}
-          afterSourceFieldRemove={afterSourceFieldRemove}
+          onBeforeSourceFieldRemove={onBeforeSourceFieldRemove}
+          onAfterSourceFieldRemove={onAfterSourceFieldRemove}
         />
 
         {/* SVG mapping line - add key property to force re-render when resizing */}
@@ -315,7 +306,6 @@ function TableMapping({
         >
           {/* mapping line */}
           <MappingLines
-            mappings={mappings}
             createPath={(sourceId, targetId) => createPath(sourceId, targetId) ?? { path: '', midX: 0, midY: 0 }}
             lineColor={lineColor}
             lineWidth={lineWidth}
@@ -326,6 +316,8 @@ function TableMapping({
             disabled={disabled}
             removeMapping={removeMapping}
             setHoveredMapping={setHoveredMapping}
+            onBeforeMappingLineRemove={onBeforeMappingLineRemove}
+            onAfterMappingLineRemove={onAfterMappingLineRemove}
           />
 
           {/* dragging line */}
@@ -378,11 +370,11 @@ function TableMapping({
         {/* target table */}
         <TargetTable
           targetTableRef={targetTableRef}
-          targets={targets}
           targetColumns={targetColumns}
           disabled={disabled}
           noDataComponent={noDataComponent}
-          afterTargetFieldRemove={afterTargetFieldRemove}
+          onBeforeTargetFieldRemove={onBeforeTargetFieldRemove}
+          onAfterTargetFieldRemove={onAfterTargetFieldRemove}
         />
       </div>
     </div>

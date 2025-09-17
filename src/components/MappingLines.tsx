@@ -1,41 +1,56 @@
 import { X } from 'lucide-react';
 import { memo } from 'react';
 
-import type { Mapping } from '@/types/table-mapping';
+import { useMappings } from '@/contexts';
 
 export interface MappingLinesProps {
-  mappings: Mapping[];
-  createPath: (sourceId: string, targetId: string) => { path: string; midX: number; midY: number };
   lineColor: string;
   lineWidth: number;
   hoverLineColor: string;
-  removeMapping: (mappingId: string) => void;
   forceUpdate: number;
   hoveredMapping: string | null;
-  setHoveredMapping: (id: string | null) => void;
   isDragging: boolean;
   disabled: boolean;
+  createPath: (sourceId: string, targetId: string) => { path: string; midX: number; midY: number };
+  removeMapping: (mappingId: string) => void;
+  setHoveredMapping: (id: string | null) => void;
+  onBeforeMappingLineRemove?: (removeMappingId: string) => void | boolean;
+  onAfterMappingLineRemove?: (removeMappingId: string) => void;
 }
 
 const MappingLines = memo(
   ({
-    mappings,
-    createPath,
     lineColor,
     lineWidth,
     hoverLineColor,
-    removeMapping,
     forceUpdate,
     hoveredMapping,
-    setHoveredMapping,
     isDragging,
     disabled,
+    createPath,
+    removeMapping,
+    setHoveredMapping,
+    onBeforeMappingLineRemove,
+    onAfterMappingLineRemove,
   }: MappingLinesProps) => {
+    const { mappings } = useMappings();
+
     const effectiveHoveredMapping = isDragging ? null : hoveredMapping;
 
     const normalMappings = mappings.filter((mapping) => mapping.id !== effectiveHoveredMapping);
     const hoveredMappingData = mappings.find((mapping) => mapping.id === effectiveHoveredMapping);
 
+    const handleMappingLineRemove = (mappingId: string) => {
+      if (!isDragging && !disabled) {
+        const shouldRemove = onBeforeMappingLineRemove?.(mappingId);
+
+        if (shouldRemove === false) return;
+
+        removeMapping(mappingId);
+
+        onAfterMappingLineRemove?.(mappingId);
+      }
+    };
     return (
       <>
         {normalMappings.map((mapping) => {
@@ -66,7 +81,7 @@ const MappingLines = memo(
                 style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                 strokeWidth={lineWidth + 4}
                 className={`hover-area ${isDragging && !disabled ? 'dragging' : ''}`}
-                onClick={() => !isDragging && !disabled && removeMapping(mapping.id)}
+                onClick={() => handleMappingLineRemove(mapping.id)}
               />
             </g>
           ) : null;
@@ -99,7 +114,7 @@ const MappingLines = memo(
                   d={pathData.path}
                   strokeWidth={lineWidth + 4.5}
                   className={`hover-area ${isDragging && !disabled ? 'dragging' : ''}`}
-                  onClick={() => !isDragging && !disabled && removeMapping(hoveredMappingData.id)}
+                  onClick={() => handleMappingLineRemove(hoveredMappingData.id)}
                 />
 
                 <foreignObject
@@ -108,7 +123,7 @@ const MappingLines = memo(
                   x={pathData.midX - 9}
                   y={pathData.midY - 9}
                   style={{ overflow: 'visible' }}
-                  onClick={() => !isDragging && !disabled && removeMapping(hoveredMappingData.id)}
+                  onClick={() => handleMappingLineRemove(hoveredMappingData.id)}
                 >
                   <div className={`mapping-delete-button ${isDragging ? 'dragging' : ''}`}>
                     <X className="mapping-delete-icon" />

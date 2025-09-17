@@ -58,13 +58,15 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'mjs' : 'js'}`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', 'uuid'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'uuid', '@radix-ui/react-select', '@radix-ui/react-slot'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           'react/jsx-runtime': 'jsxRuntime',
           uuid: 'uuid',
+          '@radix-ui/react-select': 'RadixSelect',
+          '@radix-ui/react-slot': 'RadixSlot',
         },
         assetFileNames: (assetInfo: PreRenderedAsset): string => {
           if (assetInfo.name === 'style.css') {

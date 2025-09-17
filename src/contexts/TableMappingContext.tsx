@@ -3,13 +3,21 @@
 import React, { createContext, useContext } from 'react';
 
 import useTableMapping from '@/hooks/useTableMapping';
+import type { FieldItemInput, Mapping } from '@/types/table-mapping';
 
 type TableMappingContextType = ReturnType<typeof useTableMapping>;
 
+export interface TableMappingProviderProps {
+  children: React.ReactNode;
+  mappings?: Mapping[];
+  sources?: FieldItemInput[];
+  targets?: FieldItemInput[];
+}
+
 const TableMappingContext = createContext<TableMappingContextType | null>(null);
 
-export const TableMappingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const tableMapping = useTableMapping();
+export const TableMappingProvider = ({ children, mappings, sources, targets }: TableMappingProviderProps) => {
+  const tableMapping = useTableMapping({ mappings, sources, targets });
 
   return <TableMappingContext.Provider value={tableMapping}>{children}</TableMappingContext.Provider>;
 };
@@ -96,6 +104,11 @@ export const useMappings = () =>
      * you can redraw the table mapping.
      */
     redraw: ctx.redraw,
+
+    /**
+     * you can get current redraw count.
+     */
+    redrawCount: ctx.redrawCount,
 
     /**
      * you can get current mappings.

@@ -129,11 +129,11 @@ export interface TableMappingProps {
   targetColumns: Array<Omit<HeaderColumnProps, 'type'>>;
 
   /**
-   * initial mappings
-   * - if you already have mappings, use `initialMappings` props.
+   *  mappings state
+   * - if you already have mappings, use `mappings` props.
    * - you can prerender `TableMapping` component.
    */
-  initialMappings?: Mapping[];
+  mappings?: Mapping[];
 
   /**
    * - default value is `straight`
@@ -170,16 +170,56 @@ export interface TableMappingProps {
   noDataComponent?: React.ReactNode;
 
   /**
+   * before source field remove
+   * @param sourceId
+   */
+  onBeforeSourceFieldRemove?: (sourceId: string) => void | boolean;
+
+  /**
+   * before target field remove
+   * @param targetId
+   */
+  onBeforeTargetFieldRemove?: (targetId: string) => void | boolean;
+
+  /**
    * after source field remove
    * @params removeSourceId
    */
-  afterSourceFieldRemove?: (removedSourceId: string) => void;
+  onAfterSourceFieldRemove?: (removedSourceId: string) => void;
 
   /**
    * after target field remove
    * @params removeTargetId
    */
-  afterTargetFieldRemove?: (removedTargetId: string) => void;
+  onAfterTargetFieldRemove?: (removedTargetId: string) => void;
+
+  /**
+   * after mapping line remove
+   * @param removeMappingId
+   */
+  onAfterMappingLineRemove?: (removeMappingId: string) => void;
+
+  /**
+   * before mapping line remove
+   * @param removeMappingId
+   */
+  onBeforeMappingLineRemove?: (removeMappingId: string) => void | boolean;
+
+  /**
+   * after mapping change
+   * @param sources
+   * @param targets
+   * @param mappings
+   */
+  onAfterMappingChange?: ({
+    sources,
+    targets,
+    mappings,
+  }: {
+    sources: FieldItemInput[];
+    targets: FieldItemInput[];
+    mappings: Mapping[];
+  }) => void;
 
   /**
    * if mapping, `onMappingChange` return current Mapping states.

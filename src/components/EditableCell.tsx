@@ -10,6 +10,7 @@ export interface EditableCellProps {
   fieldId: string;
   fieldKey: string;
   disabled?: boolean;
+  tableType: 'source' | 'target';
   params:
     | {
         type: 'string';
@@ -40,15 +41,17 @@ export interface EditableCellProps {
     | string;
 }
 
-const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true }: EditableCellProps) => {
+const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true, tableType }: EditableCellProps) => {
   const [localValue, setLocalValue] = useState(() => {
     if (typeof params === 'string') return params;
 
     if (params.type === 'input' || params.type === 'select') {
-      return params.defaultValue || params.value || '';
+      return params.value || params.defaultValue || '';
     }
+
     return params.value || '';
   });
+
   const { updateSourceFieldValue } = useSourceFields();
   const { updateTargetFieldValue } = useTargetFields();
 
@@ -60,11 +63,11 @@ const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true }: Edita
     if (params.type === 'select') {
       setLocalValue(inputRef.current?.value || '');
 
-      if (fieldId.includes('source') && !params.value) {
+      if (tableType === 'source' && !params.value) {
         updateSourceFieldValue(fieldId, params.columnKey, inputRef.current?.value || '');
       }
 
-      if (fieldId.includes('target') && !params.value) {
+      if (tableType === 'target' && !params.value) {
         updateTargetFieldValue(fieldId, params.columnKey, inputRef.current?.value || '');
       }
     }
@@ -90,10 +93,10 @@ const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true }: Edita
 
       if (params.type === 'input' || params.type === 'select') {
         if (params.columnKey) {
-          if (fieldId.includes('source')) {
+          if (tableType === 'source') {
             updateSourceFieldValue(fieldId, params.columnKey, value);
           }
-          if (fieldId.includes('target')) {
+          if (tableType === 'target') {
             updateTargetFieldValue(fieldId, params.columnKey, value);
           }
         }
@@ -157,7 +160,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true }: Edita
   if (params.type === 'select') {
     return (
       <div className="custom-cell-select">
-        <Select value={localValue} onValueChange={handleSelectChange}>
+        <Select defaultValue={localValue} onValueChange={handleSelectChange}>
           <SelectTrigger disabled={disabled}>
             <SelectValue />
           </SelectTrigger>
