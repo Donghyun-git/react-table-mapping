@@ -1,5 +1,4 @@
-import { isEqual } from 'es-toolkit/compat';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { TableMappingProviderProps } from '@/contexts/TableMappingContext';
@@ -12,27 +11,6 @@ const useTableMapping = ({ mappings: mappingsFromProps, sources, targets }: UseT
   const [targetFields, setTargetFields] = useState<FieldItem[]>(targets as FieldItem[]);
   const [mappings, setMappings] = useState<Mapping[]>(mappingsFromProps as Mapping[]);
   const [redrawCount, setRedrawCount] = useState<number>(0);
-
-  useEffect(() => {
-    if (sources && !isEqual(sources, sourceFields)) {
-      setSourceFields(sources as FieldItem[]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sources]);
-
-  useEffect(() => {
-    if (targets && !isEqual(targets, targetFields)) {
-      setTargetFields(targets as FieldItem[]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targets]);
-
-  useEffect(() => {
-    if (mappings && !isEqual(mappings, mappingsFromProps)) {
-      setMappings(mappings as Mapping[]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappings]);
 
   /**
    * you can refresh the table mapping.

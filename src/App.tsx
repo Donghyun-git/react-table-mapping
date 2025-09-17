@@ -1,5 +1,7 @@
-import { TableMapping } from '@/components/TableMapping';
+import TableMapping from '@/components/TableMapping';
 import type { FieldItemInput } from '@/types/table-mapping';
+
+import { TableMappingProvider } from './contexts';
 
 function App() {
   const sourceColumns = [{ title: 'Name', key: 'name' }];
@@ -151,23 +153,22 @@ function App() {
   ];
 
   return (
-    <div
-      style={{
-        height: '400px',
-      }}
-    >
-      <TableMapping
-        lineType="bezier"
-        sources={sourceFields}
-        targets={targetFields}
-        sourceColumns={sourceColumns}
-        targetColumns={targetColumns}
-        mappings={initialMappings}
-        onMappingChange={(mappings) => {
-          console.info('mappings', mappings);
+    <TableMappingProvider sources={sourceFields} targets={targetFields} mappings={initialMappings}>
+      <div
+        style={{
+          height: '400px',
         }}
-      />
-    </div>
+      >
+        <TableMapping
+          lineType="bezier"
+          sourceColumns={sourceColumns}
+          targetColumns={targetColumns}
+          onMappingChange={(mappings) => {
+            console.info('mappings', mappings);
+          }}
+        />
+      </div>
+    </TableMappingProvider>
   );
 }
 
