@@ -3,8 +3,7 @@ import { memo } from 'react';
 
 import EditableCell from '@/components/EditableCell';
 import { Button } from '@/components/ui/button';
-import { useMappings, useSourceFields } from '@/contexts';
-import type { FieldItem, HeaderColumnProps } from '@/types/table-mapping';
+import type { FieldItem, HeaderColumnProps, TableMappingRef } from '@/types/table-mapping';
 
 import NoData from './ui/nodata';
 
@@ -16,6 +15,7 @@ interface SourceTableProps {
   onBeforeSourceFieldRemove?: (sourceId: string) => void | boolean;
   onAfterSourceFieldRemove?: (removedSourceId: string) => void;
   handleDragStart: (e: React.MouseEvent, sourceId: string) => void;
+  tableMappingHook: TableMappingRef;
 }
 
 /**
@@ -26,10 +26,12 @@ const SourceRow = memo(
     field,
     handleDragStart,
     disabled,
+    tableMappingHook,
   }: {
     field: FieldItem;
     handleDragStart: (e: React.MouseEvent, sourceId: string) => void;
     disabled?: boolean;
+    tableMappingHook: TableMappingRef;
   }) => {
     const { id, key, ...rest } = field;
 
@@ -50,6 +52,7 @@ const SourceRow = memo(
                 params={params}
                 disabled={disabled}
                 tableType="source"
+                tableMappingHook={tableMappingHook}
               />
             );
           }
@@ -79,29 +82,19 @@ const SourceTable = (props: SourceTableProps) => {
     onBeforeSourceFieldRemove,
     onAfterSourceFieldRemove,
     handleDragStart,
+    tableMappingHook,
   } = props;
 
-  const { sourceFields, removeSourceField } = useSourceFields();
-  const { mappings, removeMapping, redraw } = useMappings();
+  const { sourceFields, removeSource } = tableMappingHook;
 
   const handleSourceFieldRemove = (sourceId: string) => {
     const shouldRemove = onBeforeSourceFieldRemove?.(sourceId);
 
     if (shouldRemove === false) return;
 
-    const relatedMappings = mappings.filter((mapping) => mapping.source === sourceId);
-
-    relatedMappings.forEach((mapping) => {
-      removeMapping(mapping.id);
-    });
-
-    removeSourceField(sourceId);
+    removeSource(sourceId);
 
     onAfterSourceFieldRemove?.(sourceId);
-
-    setTimeout(() => {
-      redraw();
-    }, 50);
   };
 
   return (
@@ -130,7 +123,12 @@ const SourceTable = (props: SourceTableProps) => {
               </Button>
             ) : null}
 
-            <SourceRow field={field} handleDragStart={handleDragStart} disabled={disabled} />
+            <SourceRow
+              field={field}
+              handleDragStart={handleDragStart}
+              disabled={disabled}
+              tableMappingHook={tableMappingHook}
+            />
           </div>
         ))}
         {sourceFields.length <= 0 ? noDataComponent ? noDataComponent : <NoData /> : null}

@@ -1,9 +1,11 @@
-import TableMapping from '@/components/TableMapping';
-import type { FieldItemInput } from '@/types/table-mapping';
+import { useRef, useState } from 'react';
 
-import { TableMappingProvider } from './contexts';
+import TableMapping from '@/components/TableMapping';
+import type { FieldItemInput, Mapping, TableMappingRef, TableMappingStateWithAction } from '@/types/table-mapping';
 
 function App() {
+  const tableMethodRef = useRef<TableMappingRef | null>(null);
+
   const sourceColumns = [{ title: 'Name', key: 'name' }];
 
   const targetColumns = [
@@ -12,7 +14,7 @@ function App() {
     { title: 'Function', key: 'func' },
   ];
 
-  const sourceFields = [
+  const initialSourceFields = [
     {
       name: {
         type: 'string',
@@ -60,7 +62,7 @@ function App() {
     },
   ] satisfies FieldItemInput[];
 
-  const targetFields = [
+  const initialTargetFields = [
     {
       id: '0',
       key: '0',
@@ -144,7 +146,7 @@ function App() {
     },
   ] satisfies FieldItemInput[];
 
-  const initialMappings = [
+  const initialMappings: Mapping[] = [
     {
       id: 'mapping-4-2',
       source: '4',
@@ -152,23 +154,60 @@ function App() {
     },
   ];
 
+  const [sources, setSources] = useState<FieldItemInput[]>(initialSourceFields);
+  const [targets, setTargets] = useState<FieldItemInput[]>(initialTargetFields);
+  const [mappings, setMappings] = useState<Mapping[]>(initialMappings);
+
+  const handleMappingChange = (stateWithAction: TableMappingStateWithAction) => {
+    console.info('Action:', stateWithAction.action.type);
+    console.info('Payload:', stateWithAction.action.payload);
+    console.info('New state:', stateWithAction);
+
+    setSources(stateWithAction.sources);
+    setTargets(stateWithAction.targets);
+    setMappings(stateWithAction.mappings);
+  };
+
+  const handleTestMethods = () => {
+    console.log('tableMethodRef.current:', tableMethodRef.current);
+
+    if (tableMethodRef.current) {
+      console.log('Available methods:', Object.keys(tableMethodRef.current));
+    }
+  };
+
+  const handleSameLineMapping = () => {
+    tableMethodRef.current?.sameLineMapping();
+  };
+
+  const handleSameNameMapping = () => {
+    tableMethodRef.current?.sameNameMapping('name');
+  };
+
+  const handleClearMappings = () => {
+    tableMethodRef.current?.clearMappings();
+  };
+
   return (
-    <TableMappingProvider sources={sourceFields} targets={targetFields} mappings={initialMappings}>
-      <div
-        style={{
-          height: '400px',
-        }}
-      >
-        <TableMapping
-          lineType="bezier"
-          sourceColumns={sourceColumns}
-          targetColumns={targetColumns}
-          onMappingChange={(mappings) => {
-            console.info('mappings', mappings);
-          }}
-        />
+    <div style={{ height: '400px' }}>
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+        <button onClick={handleTestMethods}>Console Log Ref</button>
+        <button onClick={handleSameLineMapping}>Same Line Mapping</button>
+        <button onClick={handleSameNameMapping}>Same Name Mapping</button>
+        <button onClick={handleClearMappings}>Clear Mappings</button>
       </div>
-    </TableMappingProvider>
+
+      <TableMapping
+        ref={tableMethodRef}
+        sources={sources}
+        targets={targets}
+        mappings={mappings}
+        lineType="bezier"
+        sourceColumns={sourceColumns}
+        targetColumns={targetColumns}
+        onMappingChange={handleMappingChange}
+      />
+    </div>
   );
 }
 

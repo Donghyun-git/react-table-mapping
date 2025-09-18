@@ -4,13 +4,14 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSourceFields, useTargetFields } from '@/contexts';
+import type { TableMappingRef } from '@/types/table-mapping';
 
 export interface EditableCellProps {
   fieldId: string;
   fieldKey: string;
   disabled?: boolean;
   tableType: 'source' | 'target';
+  tableMappingHook: TableMappingRef;
   params:
     | {
         type: 'string';
@@ -41,7 +42,7 @@ export interface EditableCellProps {
     | string;
 }
 
-const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true, tableType }: EditableCellProps) => {
+const EditableCell = memo(({ fieldId, params, disabled = true, tableType, tableMappingHook }: EditableCellProps) => {
   const [localValue, setLocalValue] = useState(() => {
     if (typeof params === 'string') return params;
 
@@ -52,8 +53,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true, tableTy
     return params.value || '';
   });
 
-  const { updateSourceFieldValue } = useSourceFields();
-  const { updateTargetFieldValue } = useTargetFields();
+  const { updateSourceFieldValue, updateTargetFieldValue } = tableMappingHook;
 
   const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
 
@@ -102,7 +102,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true, tableTy
         }
       }
     }, 300),
-    [fieldId, params, updateSourceFieldValue],
+    [fieldId, params, updateSourceFieldValue, updateTargetFieldValue, tableType],
   );
 
   /**
@@ -122,7 +122,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true, tableTy
         params.onChange?.(newValue);
       }
     },
-    [debouncedUpdate, fieldId, fieldKey],
+    [debouncedUpdate, params],
   );
 
   const handleSelectChange = useCallback(
@@ -136,7 +136,7 @@ const EditableCell = memo(({ fieldId, fieldKey, params, disabled = true, tableTy
         params.onChange?.(value);
       }
     },
-    [debouncedUpdate, fieldId, fieldKey],
+    [debouncedUpdate, params],
   );
 
   if (typeof params === 'string') {

@@ -2,6 +2,14 @@
 
 ## 📋 Changelog
 
+### Version 1.0.0-beta.16
+
+- **BREAKING CHANGE**: Removed `TableMappingProvider` - now uses parent-controlled state management
+
+- Added ref-based API for imperative method access
+- Moved Radix UI components to peerDependencies for better bundle optimization
+- Improved performance with reduced internal state management
+
 ### Version 1.0.0-beta.11
 
 - `containerHeight` & `containerMinHeight` props have been deprecated.
@@ -48,6 +56,13 @@ pnpm add react-table-mapping
 "react-dom": "^19.0.0",
 ```
 
+### Peer Dependencies
+
+```
+"@radix-ui/react-select": "^2.1.2",
+"@radix-ui/react-slot": "^1.1.1"
+```
+
 ### engines
 
 ```
@@ -64,10 +79,11 @@ import 'react-table-mapping/styles';
 
 ```tsx
 import React from 'react';
-import TableMapping from 'react-table-mapping';
-import { type FieldItemInput, TableMappingProvider } from 'react-table-mapping';
+import { TableMapping } from 'react-table-mapping';
+import type { FieldItemInput, TableMappingRef } from 'react-table-mapping';
 
 function App() {
+  const tableMappingRef = React.useRef<TableMappingRef>(null);
   // Define source table columns
   const sourceColumns = [{ title: 'Name', key: 'name' }];
 
@@ -139,20 +155,19 @@ function App() {
   ];
 
   return (
-    <TableMappingProvider>
-      <TableMapping
-        lineType="bezier"
-        sourceColumns={sourceColumns}
-        targetColumns={targetColumns}
-        sources={sourceFields}
-        targets={targetFields}
-        initialMappings={initialMappings}
-        onMappingChange={(mappings) => {
-          // you can get mappings, sources, targets
-          console.info('mappings', mappings);
-        }}
-      />
-    </TableMappingProvider>
+    <TableMapping
+      ref={tableMappingRef}
+      lineType="bezier"
+      sourceColumns={sourceColumns}
+      targetColumns={targetColumns}
+      sources={sourceFields}
+      targets={targetFields}
+      initialMappings={initialMappings}
+      onMappingChange={(mappings) => {
+        // you can get mappings, sources, targets, action
+        console.info('mappings', mappings);
+      }}
+    />
   );
 }
 
@@ -279,44 +294,184 @@ Dropdown selection with options:
 }
 ```
 
-## 🎛️ Context Provider
+## Actions
 
-The `TableMappingProvider` manages the internal state and provides mapping functionality:
+The `onMappingChange` callback provides detailed information about state changes through action objects. Each action contains a `type` and `payload` with relevant data.
 
-```tsx
-import { TableMappingProvider, useMappings, useSourceFields, useTargetFields } from 'react-table-mapping';
+### Action Types
 
-function CustomComponent() {
-  const {
-    sourceFields,
-    appendSourceField,
-    // ...rest
-  } = useSourceFields();
+#### Mapping Actions
 
-  const {
-    targetFields,
-    appendTargetField,
-    // ...rest
-  } = useTargetFields();
-  const {
-    mappings,
-    addMapping,
-    removeMapping,
-    updateMappings,
-    sameNameMapping,
-    // ...rest
-  } = useMappings();
+**ADD_MAPPING**
 
-  // Your custom logic here
+```typescript
+{
+  type: 'ADD_MAPPING',
+  payload: {
+    sourceId: string,
+    targetId: string,
+    mapping: Mapping
+  }
 }
+```
 
-function App() {
-  return (
-    <TableMappingProvider>
-      <CustomComponent />
-      <TableMapping {...props} />
-    </TableMappingProvider>
-  );
+**REMOVE_MAPPING**
+
+```typescript
+{
+  type: 'REMOVE_MAPPING',
+  payload: {
+    mappingId: string,
+    removedMapping: Mapping | undefined
+  }
+}
+```
+
+**CLEAR_MAPPINGS**
+
+```typescript
+{
+  type: 'CLEAR_MAPPINGS',
+  payload: {
+    clearedMappings: Mapping[]
+  }
+}
+```
+
+**UPDATE_MAPPINGS**
+
+```typescript
+{
+  type: 'UPDATE_MAPPINGS',
+  payload: {
+    previousMappings: Mapping[],
+    newMappings: Mapping[]
+  }
+}
+```
+
+**SAME_LINE_MAPPING**
+
+```typescript
+{
+  type: 'SAME_LINE_MAPPING',
+  payload: {
+    createdMappings: Mapping[]
+  }
+}
+```
+
+**SAME_NAME_MAPPING**
+
+```typescript
+{
+  type: 'SAME_NAME_MAPPING',
+  payload: {
+    columnKey: string,
+    createdMappings: Mapping[]
+  }
+}
+```
+
+#### Source Field Actions
+
+**APPEND_SOURCE**
+
+```typescript
+{
+  type: 'APPEND_SOURCE',
+  payload: {
+    sourceField: FieldItem
+  }
+}
+```
+
+**REMOVE_SOURCE**
+
+```typescript
+{
+  type: 'REMOVE_SOURCE',
+  payload: {
+    sourceId: string,
+    removedMappings: Mapping[]
+  }
+}
+```
+
+**UPDATE_SOURCE_FIELDS**
+
+```typescript
+{
+  type: 'UPDATE_SOURCE_FIELDS',
+  payload: {
+    previousSources: FieldItem[],
+    newSources: FieldItem[]
+  }
+}
+```
+
+**UPDATE_SOURCE_FIELD_VALUE**
+
+```typescript
+{
+  type: 'UPDATE_SOURCE_FIELD_VALUE',
+  payload: {
+    sourceId: string,
+    fieldKey: string,
+    previousValue: string,
+    newValue: string
+  }
+}
+```
+
+#### Target Field Actions
+
+**APPEND_TARGET**
+
+```typescript
+{
+  type: 'APPEND_TARGET',
+  payload: {
+    targetField: FieldItem
+  }
+}
+```
+
+**REMOVE_TARGET**
+
+```typescript
+{
+  type: 'REMOVE_TARGET',
+  payload: {
+    targetId: string,
+    removedMappings: Mapping[]
+  }
+}
+```
+
+**UPDATE_TARGET_FIELDS**
+
+```typescript
+{
+  type: 'UPDATE_TARGET_FIELDS',
+  payload: {
+    previousTargets: FieldItem[],
+    newTargets: FieldItem[]
+  }
+}
+```
+
+**UPDATE_TARGET_FIELD_VALUE**
+
+```typescript
+{
+  type: 'UPDATE_TARGET_FIELD_VALUE',
+  payload: {
+    targetId: string,
+    fieldKey: string,
+    previousValue: string,
+    newValue: string
+  }
 }
 ```
 
@@ -338,37 +493,6 @@ The library uses CSS variables for theming and supports both light and dark mode
   --color-bg-mapping-secondary: #151826;
   --color-text-default: #f3f4f9;
   --color-border-default: #545667;
-}
-```
-
-## 🔧 Advanced Usage
-
-### Dynamic Field Management
-
-```tsx
-function DynamicMappingExample() {
-  const { appendSourceField, removeSourceField } = useSourceFields();
-  const { appendTargetField, removeTargetField } = useTargetFields();
-
-  const addNewSourceField = () => {
-    appendSourceField({
-      id: `source-${Date.now()}`,
-      key: `source-${Date.now()}`,
-      name: {
-        type: 'input',
-        columnKey: 'name',
-        value: 'New Field',
-        onChange: (value) => console.log('Changed:', value),
-      },
-    });
-  };
-
-  return (
-    <div>
-      <button onClick={addNewSourceField}>Add Source Field</button>
-      <TableMapping {...props} />
-    </div>
-  );
 }
 ```
 

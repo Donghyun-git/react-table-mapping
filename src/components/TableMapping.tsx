@@ -1,13 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import MappingLines from '@/components/MappingLines';
 import SourceTable from '@/components/SourceTable';
 import TargetTable from '@/components/TargetTable';
-import { useMappings, useSourceFields, useTargetFields } from '@/contexts';
+import useTableMapping from '@/hooks/useTableMapping';
 import { type TableMappingProps } from '@/types/table-mapping';
 import { SvgLineExtractor } from '@/utils';
 
 function TableMapping({
+  ref,
+  sources = [],
+  targets = [],
+  mappings = [],
   sourceColumns = [],
   targetColumns = [],
   lineType = 'straight',
@@ -24,11 +28,25 @@ function TableMapping({
   onBeforeMappingLineRemove,
   onAfterMappingChange,
   onMappingChange,
-}: Omit<TableMappingProps, 'sources' | 'targets' | 'mappings'>) {
-  const { mappings, redrawCount, redraw, addMapping, removeMapping } = useMappings();
+}: TableMappingProps) {
+  const tableMappingHook = useTableMapping({
+    sources,
+    targets,
+    mappings,
+    onStateChange: onMappingChange || (() => {}),
+  });
 
-  const { sourceFields } = useSourceFields();
-  const { targetFields } = useTargetFields();
+  const {
+    sourceFields,
+    targetFields,
+    mappings: currentMappings,
+    redrawCount,
+    redraw,
+    addMapping,
+    removeMapping,
+  } = tableMappingHook;
+
+  useImperativeHandle(ref, () => tableMappingHook);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const sourceTableRef = useRef<HTMLDivElement>(null);
@@ -137,7 +155,6 @@ function TableMapping({
 
     if (!svgRect) {
       setDragging({ ...dragging, active: false });
-
       return;
     }
 
@@ -157,7 +174,9 @@ function TableMapping({
       const distance = Math.sqrt(Math.pow(currentX - targetX, 2) + Math.pow(currentY - targetY, 2));
 
       if (distance <= 15) {
-        const existingMapping = mappings.find((m) => m.source === dragging.sourceId && m.target === targetField.id);
+        const existingMapping = currentMappings.find(
+          (m) => m.source === dragging.sourceId && m.target === targetField.id,
+        );
 
         if (!existingMapping) {
           addMapping(dragging.sourceId, targetField.id);
@@ -211,18 +230,11 @@ function TableMapping({
   );
 
   useEffect(() => {
-    if (onMappingChange) {
-      onMappingChange({ sources: sourceFields, targets: targetFields, mappings });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappings, sourceFields, targetFields]);
-
-  useEffect(() => {
     if (onAfterMappingChange) {
-      onAfterMappingChange({ sources: sourceFields, targets: targetFields, mappings });
+      onAfterMappingChange({ sources: sourceFields, targets: targetFields, mappings: currentMappings });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappings]);
+  }, [currentMappings]);
 
   //mutation observer effect
   useEffect(() => {
@@ -288,9 +300,10 @@ function TableMapping({
           handleDragStart={handleDragStart}
           onBeforeSourceFieldRemove={onBeforeSourceFieldRemove}
           onAfterSourceFieldRemove={onAfterSourceFieldRemove}
+          tableMappingHook={tableMappingHook}
         />
 
-        {/* SVG mapping line - add key property to force re-render when resizing */}
+        {/* SVG mapping line */}
         <svg
           ref={svgRef}
           className="mapping-svg"
@@ -318,6 +331,7 @@ function TableMapping({
             setHoveredMapping={setHoveredMapping}
             onBeforeMappingLineRemove={onBeforeMappingLineRemove}
             onAfterMappingLineRemove={onAfterMappingLineRemove}
+            mappings={currentMappings}
           />
 
           {/* dragging line */}
@@ -375,6 +389,7 @@ function TableMapping({
           noDataComponent={noDataComponent}
           onBeforeTargetFieldRemove={onBeforeTargetFieldRemove}
           onAfterTargetFieldRemove={onAfterTargetFieldRemove}
+          tableMappingHook={tableMappingHook}
         />
       </div>
     </div>

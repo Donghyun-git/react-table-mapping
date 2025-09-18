@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
 import { memo } from 'react';
 
-import { useMappings } from '@/contexts';
+import type { Mapping } from '@/types/table-mapping';
 
 export interface MappingLinesProps {
   lineColor: string;
@@ -16,6 +16,7 @@ export interface MappingLinesProps {
   setHoveredMapping: (id: string | null) => void;
   onBeforeMappingLineRemove?: (removeMappingId: string) => void | boolean;
   onAfterMappingLineRemove?: (removeMappingId: string) => void;
+  mappings: Mapping[];
 }
 
 const MappingLines = memo(
@@ -32,9 +33,8 @@ const MappingLines = memo(
     setHoveredMapping,
     onBeforeMappingLineRemove,
     onAfterMappingLineRemove,
+    mappings,
   }: MappingLinesProps) => {
-    const { mappings } = useMappings();
-
     const effectiveHoveredMapping = isDragging ? null : hoveredMapping;
 
     const normalMappings = mappings.filter((mapping) => mapping.id !== effectiveHoveredMapping);
@@ -51,6 +51,7 @@ const MappingLines = memo(
         onAfterMappingLineRemove?.(mappingId);
       }
     };
+
     return (
       <>
         {normalMappings.map((mapping) => {
