@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import path from 'path';
@@ -31,6 +32,7 @@ export default defineConfig(({ mode }) => {
       dts({
         insertTypesEntry: true,
         exclude: [
+          '__test__/**/*',
           'e2e/**/*',
           'stories/**/*',
           'src/main.tsx',
@@ -86,6 +88,33 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+      },
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./__test__/setup.ts'],
+      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', '**/playwright-report/**', '**/test-results/**'],
+
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+        include: ['src/hooks/**/*.ts'],
+        exclude: [
+          'node_modules/',
+          '__test__/',
+          'e2e/',
+          '**/*.d.ts',
+          '**/*.config.*',
+          'dist/',
+          'stories/',
+          'src/main.tsx',
+          'src/App.tsx',
+          'src/components/ui/**',
+          'playwright-report/',
+          'test-results/',
+          'trace/',
+        ],
       },
     },
   };

@@ -28,6 +28,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "stories"],
+  "include": ["src", "stories", "__test__", "e2e"],
   "exclude": ["node_modules", "dist"]
 }
