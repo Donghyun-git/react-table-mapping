@@ -80,6 +80,7 @@ const MappingLines = memo(
               <path
                 d={pathData.path}
                 style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                fill="transparent"
                 strokeWidth={lineWidth + 4}
                 className={`hover-area ${isDragging && !disabled ? 'dragging' : ''}`}
                 onClick={() => handleMappingLineRemove(mapping.id)}

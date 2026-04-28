@@ -1,5 +1,11 @@
 # React Table Mapping Changelog
 
+## Version 1.0.3
+
+Released on April 28th, 2026.
+
+- fix Mapping Component Width.
+
 ## Version 1.0.2
 
 Released on April 28th, 2026.
