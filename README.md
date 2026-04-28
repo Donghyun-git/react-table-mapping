@@ -2,7 +2,7 @@
 
 ## 📋 Changelog
 
-[Changelog](https://github.com/donghyun-git/react-table-mapping/CHANGELOG.md)
+[Changelog](https://github.com/react-table-mapping/react-table-mapping/blob/main/CHANGELOG.md)
 
 ## 📺 DEMO
 
@@ -333,7 +333,8 @@ The `onMappingChange` callback provides detailed information about state changes
 {
   type: 'SAME_LINE_MAPPING',
   payload: {
-    createdMappings: Mapping[]
+    previousMappings: Mapping[],
+    newMappings: Mapping[]
   }
 }
 ```
@@ -344,8 +345,9 @@ The `onMappingChange` callback provides detailed information about state changes
 {
   type: 'SAME_NAME_MAPPING',
   payload: {
-    columnKey: string,
-    createdMappings: Mapping[]
+    name: string,
+    previousMappings: Mapping[],
+    newMappings: Mapping[]
   }
 }
 ```
@@ -358,7 +360,7 @@ The `onMappingChange` callback provides detailed information about state changes
 {
   type: 'APPEND_SOURCE',
   payload: {
-    sourceField: FieldItem
+    source: FieldItem
   }
 }
 ```
@@ -395,7 +397,6 @@ The `onMappingChange` callback provides detailed information about state changes
   payload: {
     sourceId: string,
     fieldKey: string,
-    previousValue: string,
     newValue: string
   }
 }
@@ -409,7 +410,7 @@ The `onMappingChange` callback provides detailed information about state changes
 {
   type: 'APPEND_TARGET',
   payload: {
-    targetField: FieldItem
+    target: FieldItem
   }
 }
 ```
@@ -446,7 +447,6 @@ The `onMappingChange` callback provides detailed information about state changes
   payload: {
     targetId: string,
     fieldKey: string,
-    previousValue: string,
     newValue: string
   }
 }

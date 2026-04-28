@@ -17,53 +17,40 @@ interface TargetTableProps {
   tableMappingHook: TableMappingRef;
 }
 
-const TargetRow = memo(
-  ({
-    field,
-    disabled,
-    tableMappingHook,
-  }: {
-    field: FieldItem;
-    disabled?: boolean;
-    tableMappingHook: TableMappingRef;
-  }) => {
-    const { id, key, ...rest } = field;
+const TargetRow = memo(({ field, disabled }: { field: FieldItem; disabled?: boolean }) => {
+  const { id, key, ...rest } = field;
 
-    const entries = Object.entries(rest ?? {}).filter(([, params]) => params);
-    const columnCount = entries.length;
+  const entries = Object.entries(rest ?? {}).filter(([, params]) => params);
+  const columnCount = entries.length;
 
-    const gridTemplateColumns = `repeat(${columnCount}, 1fr) auto`;
+  const gridTemplateColumns = `repeat(${columnCount}, 1fr) auto`;
 
-    return (
-      <div key={id || key} className="target-table-row" style={{ gridTemplateColumns }}>
-        {Object.entries(rest ?? {}).map(([fieldKey, params]) => {
-          if (params) {
-            return (
-              <EditableCell
-                key={`${id}-${fieldKey}`}
-                fieldId={id}
-                fieldKey={fieldKey}
-                params={params}
-                disabled={disabled}
-                tableType="target"
-                tableMappingHook={tableMappingHook}
-              />
-            );
-          }
-
-          return null;
-        })}
-
-        <div
-          id={`connector-target-${id}`}
-          data-testid={`connector-target-${id}`}
-          className="target-connector connector"
-          style={{ cursor: disabled ? 'not-allowed' : 'pointer', pointerEvents: disabled ? 'none' : 'auto' }}
-        />
-      </div>
-    );
-  },
-);
+  return (
+    <div key={id || key} className="target-table-row" style={{ gridTemplateColumns }}>
+      {Object.entries(rest ?? {}).map(([fieldKey, params]) => {
+        if (params) {
+          return (
+            <EditableCell
+              key={`${id}-${fieldKey}`}
+              fieldId={id}
+              fieldKey={fieldKey}
+              params={params}
+              disabled={disabled}
+              tableType="target"
+            />
+          );
+        }
+        return null;
+      })}
+      <div
+        id={`connector-target-${id}`}
+        data-testid={`connector-target-${id}`}
+        className="target-connector connector"
+        style={{ cursor: disabled ? 'not-allowed' : 'pointer', pointerEvents: disabled ? 'none' : 'auto' }}
+      />
+    </div>
+  );
+});
 
 const TargetTable = (props: TargetTableProps) => {
   const {
@@ -80,11 +67,8 @@ const TargetTable = (props: TargetTableProps) => {
 
   const handleTargetFieldRemove = (targetId: string) => {
     const shouldRemove = onBeforeTargetFieldRemove?.(targetId);
-
     if (shouldRemove === false) return;
-
     removeTarget(targetId);
-
     onAfterTargetFieldRemove?.(targetId);
   };
 
@@ -103,7 +87,7 @@ const TargetTable = (props: TargetTableProps) => {
       <div className="target-table-body">
         {targetFields.map((field) => (
           <div key={field.id || field.key} className="target-table-row-container">
-            <TargetRow field={field} disabled={disabled} tableMappingHook={tableMappingHook} />
+            <TargetRow field={field} disabled={disabled} />
             {!disabled ? (
               <Button
                 className="mapping-button"

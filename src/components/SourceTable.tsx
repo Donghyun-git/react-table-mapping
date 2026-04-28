@@ -18,20 +18,15 @@ interface SourceTableProps {
   tableMappingHook: TableMappingRef;
 }
 
-/**
- * source row component
- */
 const SourceRow = memo(
   ({
     field,
     handleDragStart,
     disabled,
-    tableMappingHook,
   }: {
     field: FieldItem;
     handleDragStart: (e: React.MouseEvent, sourceId: string) => void;
     disabled?: boolean;
-    tableMappingHook: TableMappingRef;
   }) => {
     const { id, key, ...rest } = field;
 
@@ -52,7 +47,6 @@ const SourceRow = memo(
                 params={params}
                 disabled={disabled}
                 tableType="source"
-                tableMappingHook={tableMappingHook}
               />
             );
           }
@@ -70,9 +64,6 @@ const SourceRow = memo(
   },
 );
 
-/**
- * main source table component
- */
 const SourceTable = (props: SourceTableProps) => {
   const {
     sourceTableRef,
@@ -89,11 +80,8 @@ const SourceTable = (props: SourceTableProps) => {
 
   const handleSourceFieldRemove = (sourceId: string) => {
     const shouldRemove = onBeforeSourceFieldRemove?.(sourceId);
-
     if (shouldRemove === false) return;
-
     removeSource(sourceId);
-
     onAfterSourceFieldRemove?.(sourceId);
   };
 
@@ -122,13 +110,7 @@ const SourceTable = (props: SourceTableProps) => {
                 <MinusIcon width={12} height={12} />
               </Button>
             ) : null}
-
-            <SourceRow
-              field={field}
-              handleDragStart={handleDragStart}
-              disabled={disabled}
-              tableMappingHook={tableMappingHook}
-            />
+            <SourceRow field={field} handleDragStart={handleDragStart} disabled={disabled} />
           </div>
         ))}
         {sourceFields.length <= 0 ? noDataComponent ? noDataComponent : <NoData /> : null}

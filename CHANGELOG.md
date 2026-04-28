@@ -1,5 +1,11 @@
 # React Table Mapping Changelog
 
+## Version 1.0.2
+
+Released on April 28th, 2026.
+
+- **Bug fix**: Typing rapidly across multiple `input` or `select` cells no longer causes previously-entered values to be wiped. Values are now preserved correctly during concurrent edits.
+
 ## Version 1.0.1
 
 Released on December 9th, 2025.

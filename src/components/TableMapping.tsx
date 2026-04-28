@@ -4,6 +4,7 @@ import MappingLines from '@/components/MappingLines';
 import SourceTable from '@/components/SourceTable';
 import TargetTable from '@/components/TargetTable';
 import useTableMapping from '@/hooks/useTableMapping';
+import TableMappingStoreContext from '@/store/TableMappingStoreContext';
 import { type TableMappingProps } from '@/types/table-mapping';
 import { SvgLineExtractor } from '@/utils';
 
@@ -44,6 +45,7 @@ function TableMapping({
     redraw,
     addMapping,
     removeMapping,
+    _store,
   } = tableMappingHook;
 
   useImperativeHandle(ref, () => tableMappingHook);
@@ -283,116 +285,118 @@ function TableMapping({
   }, []);
 
   return (
-    <div className="react-table-mapping">
-      <div
-        ref={mappingContainerRef}
-        className="mapping-container"
-        style={{
-          minHeight: containerHeight !== 0 && containerHeight > 180 ? `${containerHeight}px` : '180px',
-        }}
-      >
-        {/* source table */}
-        <SourceTable
-          sourceTableRef={sourceTableRef}
-          sourceColumns={sourceColumns}
-          disabled={disabled}
-          noDataComponent={noDataComponent}
-          handleDragStart={handleDragStart}
-          onBeforeSourceFieldRemove={onBeforeSourceFieldRemove}
-          onAfterSourceFieldRemove={onAfterSourceFieldRemove}
-          tableMappingHook={tableMappingHook}
-        />
-
-        {/* SVG mapping line */}
-        <svg
-          ref={svgRef}
-          className="mapping-svg"
+    <TableMappingStoreContext.Provider value={_store}>
+      <div className="react-table-mapping">
+        <div
+          ref={mappingContainerRef}
+          className="mapping-container"
           style={{
             minHeight: containerHeight !== 0 && containerHeight > 180 ? `${containerHeight}px` : '180px',
           }}
-          onMouseMove={handleDrag}
-          onMouseUp={handleDragEnd}
-          onMouseLeave={(e) => {
-            handleDragEnd(e);
-            setHoveredMapping(null);
-          }}
         >
-          {/* mapping line */}
-          <MappingLines
-            createPath={(sourceId, targetId) => createPath(sourceId, targetId) ?? { path: '', midX: 0, midY: 0 }}
-            lineColor={lineColor}
-            lineWidth={lineWidth}
-            hoverLineColor={hoverLineColor}
-            forceUpdate={redrawCount}
-            hoveredMapping={hoveredMapping}
-            isDragging={dragging?.active}
+          {/* source table */}
+          <SourceTable
+            sourceTableRef={sourceTableRef}
+            sourceColumns={sourceColumns}
             disabled={disabled}
-            removeMapping={removeMapping}
-            setHoveredMapping={setHoveredMapping}
-            onBeforeMappingLineRemove={onBeforeMappingLineRemove}
-            onAfterMappingLineRemove={onAfterMappingLineRemove}
-            mappings={currentMappings}
+            noDataComponent={noDataComponent}
+            handleDragStart={handleDragStart}
+            onBeforeSourceFieldRemove={onBeforeSourceFieldRemove}
+            onAfterSourceFieldRemove={onAfterSourceFieldRemove}
+            tableMappingHook={tableMappingHook}
           />
 
-          {/* dragging line */}
-          {dragging.active && (
-            <path
-              d={
-                lineType === 'straight'
-                  ? `M ${dragging.startX} ${dragging.startY} L ${dragging.currentX} ${dragging.currentY}`
-                  : lineType === 'step'
-                    ? `M ${dragging.startX} ${dragging.startY} L ${dragging.startX + (dragging.currentX - dragging.startX) / 2} ${dragging.startY} L ${dragging.startX + (dragging.currentX - dragging.startX) / 2} ${dragging.currentY} L ${dragging.currentX} ${dragging.currentY}`
-                    : `M ${dragging.startX} ${dragging.startY} C ${dragging.startX} ${dragging.startY}, ${dragging.currentX - 100} ${dragging.currentY}, ${dragging.currentX} ${dragging.currentY}`
-              }
-              stroke={lineColor}
-              strokeWidth={lineWidth}
-              strokeDasharray="5,5"
-              fill="none"
+          {/* SVG mapping line */}
+          <svg
+            ref={svgRef}
+            className="mapping-svg"
+            style={{
+              minHeight: containerHeight !== 0 && containerHeight > 180 ? `${containerHeight}px` : '180px',
+            }}
+            onMouseMove={handleDrag}
+            onMouseUp={handleDragEnd}
+            onMouseLeave={(e) => {
+              handleDragEnd(e);
+              setHoveredMapping(null);
+            }}
+          >
+            {/* mapping line */}
+            <MappingLines
+              createPath={(sourceId, targetId) => createPath(sourceId, targetId) ?? { path: '', midX: 0, midY: 0 }}
+              lineColor={lineColor}
+              lineWidth={lineWidth}
+              hoverLineColor={hoverLineColor}
+              forceUpdate={redrawCount}
+              hoveredMapping={hoveredMapping}
+              isDragging={dragging?.active}
+              disabled={disabled}
+              removeMapping={removeMapping}
+              setHoveredMapping={setHoveredMapping}
+              onBeforeMappingLineRemove={onBeforeMappingLineRemove}
+              onAfterMappingLineRemove={onAfterMappingLineRemove}
+              mappings={currentMappings}
             />
-          )}
 
-          {/* define arrow marker */}
-          <defs>
-            {/* normal arrow */}
-            <marker
-              id="arrowhead-normal"
-              viewBox="0 0 10 10"
-              refX="8"
-              refY="5"
-              markerWidth="4"
-              markerHeight="4"
-              orient="auto"
-            >
-              <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={lineColor || '#3b82f6'} strokeWidth="1.5" />
-            </marker>
+            {/* dragging line */}
+            {dragging.active && (
+              <path
+                d={
+                  lineType === 'straight'
+                    ? `M ${dragging.startX} ${dragging.startY} L ${dragging.currentX} ${dragging.currentY}`
+                    : lineType === 'step'
+                      ? `M ${dragging.startX} ${dragging.startY} L ${dragging.startX + (dragging.currentX - dragging.startX) / 2} ${dragging.startY} L ${dragging.startX + (dragging.currentX - dragging.startX) / 2} ${dragging.currentY} L ${dragging.currentX} ${dragging.currentY}`
+                      : `M ${dragging.startX} ${dragging.startY} C ${dragging.startX} ${dragging.startY}, ${dragging.currentX - 100} ${dragging.currentY}, ${dragging.currentX} ${dragging.currentY}`
+                }
+                stroke={lineColor}
+                strokeWidth={lineWidth}
+                strokeDasharray="5,5"
+                fill="none"
+              />
+            )}
 
-            {/* hover arrow */}
-            <marker
-              id="arrowhead-hover"
-              viewBox="0 0 10 10"
-              refX="8"
-              refY="5"
-              markerWidth="4"
-              markerHeight="4"
-              orient="auto"
-            >
-              <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={hoverLineColor || '#60a5fa'} strokeWidth="1.5" />
-            </marker>
-          </defs>
-        </svg>
+            {/* define arrow marker */}
+            <defs>
+              {/* normal arrow */}
+              <marker
+                id="arrowhead-normal"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="4"
+                markerHeight="4"
+                orient="auto"
+              >
+                <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={lineColor || '#3b82f6'} strokeWidth="1.5" />
+              </marker>
 
-        {/* target table */}
-        <TargetTable
-          targetTableRef={targetTableRef}
-          targetColumns={targetColumns}
-          disabled={disabled}
-          noDataComponent={noDataComponent}
-          onBeforeTargetFieldRemove={onBeforeTargetFieldRemove}
-          onAfterTargetFieldRemove={onAfterTargetFieldRemove}
-          tableMappingHook={tableMappingHook}
-        />
+              {/* hover arrow */}
+              <marker
+                id="arrowhead-hover"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="4"
+                markerHeight="4"
+                orient="auto"
+              >
+                <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={hoverLineColor || '#60a5fa'} strokeWidth="1.5" />
+              </marker>
+            </defs>
+          </svg>
+
+          {/* target table */}
+          <TargetTable
+            targetTableRef={targetTableRef}
+            targetColumns={targetColumns}
+            disabled={disabled}
+            noDataComponent={noDataComponent}
+            onBeforeTargetFieldRemove={onBeforeTargetFieldRemove}
+            onAfterTargetFieldRemove={onAfterTargetFieldRemove}
+            tableMappingHook={tableMappingHook}
+          />
+        </div>
       </div>
-    </div>
+    </TableMappingStoreContext.Provider>
   );
 }
 

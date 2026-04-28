@@ -1,19 +1,15 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import type {
-  FieldItem,
-  FieldItemInput,
-  Mapping,
-  NotifyAction,
-  TableMappingStateWithAction,
-} from '@/types/table-mapping';
+import { createTableMappingStore } from '@/store/createTableMappingStore';
+import type { FieldItem, FieldItemInput, Mapping, TableMappingStateWithAction } from '@/types/table-mapping';
+
+import type { TableMappingStore } from '../store/createTableMappingStore';
 
 interface UseTableMappingProps {
   sources: FieldItemInput[];
   targets: FieldItemInput[];
   mappings: Mapping[];
-
   onStateChange: (stateWithAction: TableMappingStateWithAction) => void;
 }
 
@@ -25,275 +21,85 @@ const useTableMapping = ({
 }: UseTableMappingProps) => {
   const [redrawCount, setRedrawCount] = useState<number>(0);
 
-  const sourceFields = sourcesFromProps as FieldItem[];
-  const targetFields = targetsFromProps as FieldItem[];
-  const mappings = mappingsFromProps;
+  const latestEmitRef = useRef(onStateChange);
+  latestEmitRef.current = onStateChange;
 
-  const notifyChange = (
-    newSources: FieldItem[],
-    newTargets: FieldItem[],
-    newMappings: Mapping[],
-    action: NotifyAction,
-  ) => {
-    onStateChange({
-      sources: newSources,
-      targets: newTargets,
-      mappings: newMappings,
-      action,
+  const storeRef = useRef<TableMappingStore | null>(null);
+
+  if (!storeRef.current) {
+    storeRef.current = createTableMappingStore({
+      initial: {
+        sources: sourcesFromProps as FieldItem[],
+        targets: targetsFromProps as FieldItem[],
+        mappings: mappingsFromProps,
+      },
+      emit: (action, snapshot) => {
+        latestEmitRef.current({ ...snapshot, action });
+      },
     });
-  };
+  }
 
-  /**
-   * you can redraw the table.
-   */
-  const redraw = () => {
-    setRedrawCount((prev) => prev + 1);
-  };
+  const store = storeRef.current;
 
-  /**
-   * you can append source field.
-   * @param source
-   */
+  // Reconcile incoming props with the store on every change (echo-aware).
+  useEffect(() => {
+    store.applyExternalProps({
+      sources: sourcesFromProps as FieldItem[],
+      targets: targetsFromProps as FieldItem[],
+      mappings: mappingsFromProps,
+    });
+  }, [sourcesFromProps, targetsFromProps, mappingsFromProps, store]);
+
+  // Stable subscribe callbacks for useSyncExternalStore.
+  const subscribeSourcesList = useCallback((cb: () => void) => store.subscribe('sources:list', cb), [store]);
+  const subscribeTargetsList = useCallback((cb: () => void) => store.subscribe('targets:list', cb), [store]);
+  const subscribeMappings = useCallback((cb: () => void) => store.subscribe('mappings', cb), [store]);
+
+  const getSourcesSnapshot = useCallback(() => store.getSnapshot().sources, [store]);
+  const getTargetsSnapshot = useCallback(() => store.getSnapshot().targets, [store]);
+  const getMappingsSnapshot = useCallback(() => store.getSnapshot().mappings, [store]);
+
+  const sourceFields = useSyncExternalStore(subscribeSourcesList, getSourcesSnapshot);
+  const targetFields = useSyncExternalStore(subscribeTargetsList, getTargetsSnapshot);
+  const mappings = useSyncExternalStore(subscribeMappings, getMappingsSnapshot);
+
+  // ─── Redraw ──────────────────────────────────────────────────────────────────
+
+  const redraw = () => setRedrawCount((prev) => prev + 1);
+
+  // ─── Mutations ───────────────────────────────────────────────────────────────
+
   const appendSource = (source: FieldItem) => {
-    const newSource = {
-      ...source,
-      id: source.id ? source.id : `source-${uuidv4()}`,
-    } as FieldItem;
-
-    const newSources = [...sourceFields, newSource];
-
-    notifyChange(newSources, targetFields, mappings, {
-      type: 'APPEND_SOURCE',
-      payload: { source: newSource },
-    });
+    const newSource: FieldItem = { ...source, id: source.id || `source-${uuidv4()}` };
+    store.appendSource(newSource);
   };
 
-  /**
-   * you can append target field.
-   * @param target
-   */
   const appendTarget = (target: FieldItem) => {
-    const newTarget = {
-      ...target,
-      id: target.id ? target.id : `target-${uuidv4()}`,
-    } as FieldItem;
-
-    const newTargets = [...targetFields, newTarget];
-    notifyChange(sourceFields, newTargets, mappings, {
-      type: 'APPEND_TARGET',
-      payload: { target: newTarget },
-    });
+    const newTarget: FieldItem = { ...target, id: target.id || `target-${uuidv4()}` };
+    store.appendTarget(newTarget);
   };
 
-  /**
-   * you can remove source field.
-   * @param sourceId
-   */
-  const removeSource = (sourceId: string) => {
-    const newSources = sourceFields.filter((field) => field.id !== sourceId);
-    const newMappings = mappings.filter((mapping) => mapping.source !== sourceId);
-    const removedMappings = mappings.filter((mapping) => mapping.source === sourceId);
+  const removeSource = (sourceId: string) => store.removeSource(sourceId);
+  const removeTarget = (targetId: string) => store.removeTarget(targetId);
 
-    notifyChange(newSources, targetFields, newMappings, {
-      type: 'REMOVE_SOURCE',
-      payload: { sourceId, removedMappings },
-    });
-  };
+  const addMapping = (sourceId: string, targetId: string) => store.addMapping(sourceId, targetId);
+  const removeMapping = (mappingId: string) => store.removeMapping(mappingId);
 
-  /**
-   * you can remove target field.
-   * @param targetId
-   */
-  const removeTarget = (targetId: string) => {
-    const newTargets = targetFields.filter((field) => field.id !== targetId);
-    const newMappings = mappings.filter((mapping) => mapping.target !== targetId);
-    const removedMappings = mappings.filter((mapping) => mapping.target === targetId);
+  const clearMappings = () => store.clearMappings();
+  const updateMappings = (next: Mapping[]) => store.updateMappings(next);
+  const sameLineMapping = () => store.sameLineMapping();
+  const sameNameMapping = (name: string) => store.sameNameMapping(name);
 
-    notifyChange(sourceFields, newTargets, newMappings, {
-      type: 'REMOVE_TARGET',
-      payload: { targetId, removedMappings },
-    });
-  };
+  const updateSourceFields = (next: FieldItem[]) => store.updateSourceFields(next);
+  const updateTargetFields = (next: FieldItem[]) => store.updateTargetFields(next);
 
-  /**
-   * you can add a new mapping between source and target
-   * @param sourceId
-   * @param targetId
-   */
-  const addMapping = (sourceId: string, targetId: string) => {
-    const existingMapping = mappings.find((mapping) => mapping.source === sourceId && mapping.target === targetId);
-
-    if (existingMapping) return;
-
-    const newMapping = {
-      id: `mapping-${sourceId}-${targetId}`,
-      source: sourceId,
-      target: targetId,
-    };
-
-    const newMappings = [...mappings, newMapping];
-    notifyChange(sourceFields, targetFields, newMappings, {
-      type: 'ADD_MAPPING',
-      payload: { sourceId, targetId, mapping: newMapping },
-    });
-  };
-
-  /**
-   * you can remove a specific mapping by id
-   * @param mappingId
-   */
-  const removeMapping = (mappingId: string) => {
-    const removedMapping = mappings.find((mapping) => mapping.id === mappingId);
-    const newMappings = mappings.filter((mapping) => mapping.id !== mappingId);
-
-    notifyChange(sourceFields, targetFields, newMappings, {
-      type: 'REMOVE_MAPPING',
-      payload: { mappingId, removedMapping },
-    });
-  };
-
-  /**
-   * you can clear all mappings.
-   */
-  const clearMappings = () => {
-    const clearedMappings = [...mappings];
-    notifyChange(sourceFields, targetFields, [], {
-      type: 'CLEAR_MAPPINGS',
-      payload: { clearedMappings },
-    });
-  };
-
-  /**
-   * you can update all source fields at once
-   * @param newSourceFields
-   */
-  const updateSourceFields = (newSourceFields: FieldItem[]) => {
-    notifyChange(newSourceFields, targetFields, mappings, {
-      type: 'UPDATE_SOURCE_FIELDS',
-      payload: { previousSources: sourceFields, newSources: newSourceFields },
-    });
-  };
-
-  /**
-   * you can update all target fields at once
-   * @param newTargetFields
-   */
-  const updateTargetFields = (newTargetFields: FieldItem[]) => {
-    notifyChange(sourceFields, newTargetFields, mappings, {
-      type: 'UPDATE_TARGET_FIELDS',
-      payload: { previousTargets: targetFields, newTargets: newTargetFields },
-    });
-  };
-
-  /**
-   * you can update source field value
-   */
+  // Programmatic value updates go through immediately (no debounce).
   const updateSourceFieldValue = (sourceId: string, fieldKey: string, newValue: string) => {
-    const newSources = sourceFields.map((field) =>
-      field.id === sourceId &&
-      typeof field[fieldKey] !== 'string' &&
-      (field[fieldKey]?.type === 'string' || field[fieldKey]?.type === 'input' || field[fieldKey]?.type === 'select')
-        ? {
-            ...field,
-            [fieldKey]: {
-              ...field[fieldKey],
-              value: newValue,
-            },
-          }
-        : field,
-    );
-
-    notifyChange(newSources, targetFields, mappings, {
-      type: 'UPDATE_SOURCE_FIELD_VALUE',
-      payload: { sourceId, fieldKey, newValue },
-    });
+    store.setFieldValue('source', sourceId, fieldKey, newValue, { immediate: true });
   };
 
-  /**
-   * you can update target field value
-   */
   const updateTargetFieldValue = (targetId: string, fieldKey: string, newValue: string) => {
-    const newTargets = targetFields.map((field) =>
-      field.id === targetId &&
-      typeof field[fieldKey] !== 'string' &&
-      (field[fieldKey]?.type === 'string' || field[fieldKey]?.type === 'input' || field[fieldKey]?.type === 'select')
-        ? {
-            ...field,
-            [fieldKey]: {
-              ...field[fieldKey],
-              value: newValue,
-            },
-          }
-        : field,
-    );
-
-    notifyChange(sourceFields, newTargets, mappings, {
-      type: 'UPDATE_TARGET_FIELD_VALUE',
-      payload: { targetId, fieldKey, newValue },
-    });
-  };
-
-  /**
-   * you can same name mapping.
-   */
-  const sameNameMapping = (name: string) => {
-    const sameNameMappings: Mapping[] = [];
-
-    sourceFields.forEach((source) => {
-      targetFields.forEach((target) => {
-        if (typeof source[name] === 'string' || typeof target[name] === 'string') {
-          return;
-        }
-
-        if (source[name]?.columnKey && target[name]?.columnKey) {
-          if (source[name]?.value === target[name]?.value) {
-            sameNameMappings.push({
-              id: `mapping-${source.id}-${target.id}`,
-              source: source.id,
-              target: target.id,
-            });
-          }
-        } else {
-          throw new Error('columnKey is required');
-        }
-      });
-    });
-
-    notifyChange(sourceFields, targetFields, sameNameMappings, {
-      type: 'SAME_NAME_MAPPING',
-      payload: { name, previousMappings: mappings, newMappings: sameNameMappings },
-    });
-  };
-
-  /**
-   * you can mapping same line.
-   */
-  const sameLineMapping = () => {
-    const minLength = Math.min(sourceFields.length, targetFields.length);
-    const sameLineMappings: Mapping[] = [];
-
-    for (let i = 0; i < minLength; i++) {
-      sameLineMappings.push({
-        id: `mapping-${sourceFields[i].id}-${targetFields[i].id}`,
-        source: sourceFields[i].id,
-        target: targetFields[i].id,
-      });
-    }
-
-    notifyChange(sourceFields, targetFields, sameLineMappings, {
-      type: 'SAME_LINE_MAPPING',
-      payload: { previousMappings: mappings, newMappings: sameLineMappings },
-    });
-  };
-
-  /**
-   * set mappings.
-   */
-  const updateMappings = (newMappings: Mapping[]) => {
-    notifyChange(sourceFields, targetFields, newMappings, {
-      type: 'UPDATE_MAPPINGS',
-      payload: { previousMappings: mappings, newMappings },
-    });
+    store.setFieldValue('target', targetId, fieldKey, newValue, { immediate: true });
   };
 
   return {
@@ -302,9 +108,9 @@ const useTableMapping = ({
     mappings,
     redrawCount,
     redraw,
-    getSourceFields: () => sourceFields,
-    getTargetFields: () => targetFields,
-    getMappings: () => mappings,
+    getSourceFields: () => store.getSnapshot().sources,
+    getTargetFields: () => store.getSnapshot().targets,
+    getMappings: () => store.getSnapshot().mappings,
     appendSource,
     removeSource,
     updateSourceFields,
@@ -319,6 +125,8 @@ const useTableMapping = ({
     updateMappings,
     sameLineMapping,
     sameNameMapping,
+    // Internal — used by TableMapping to provide store Context to EditableCell.
+    _store: store,
   };
 };
 

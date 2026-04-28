@@ -1,9 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { debounce } from 'es-toolkit';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useSyncExternalStore } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTableMappingStore } from '@/store/TableMappingStoreContext';
+import type { StoreTopic } from '@/store/createTableMappingStore';
 import type { TableMappingRef } from '@/types/table-mapping';
 
 export interface EditableCellProps {
@@ -11,7 +11,8 @@ export interface EditableCellProps {
   fieldKey: string;
   disabled?: boolean;
   tableType: 'source' | 'target';
-  tableMappingHook: TableMappingRef;
+  /** @deprecated Kept for backward compat with SourceTable/TargetTable — not used internally. */
+  tableMappingHook?: TableMappingRef;
   params:
     | {
         type: 'string';
@@ -42,130 +43,80 @@ export interface EditableCellProps {
     | string;
 }
 
-const EditableCell = memo(({ fieldId, params, disabled = true, tableType, tableMappingHook }: EditableCellProps) => {
-  const [localValue, setLocalValue] = useState(() => {
-    if (typeof params === 'string') return params;
+/**
+ * Static display cell
+ */
+const StaticCell = memo(({ text }: { text: string }) => <div className="custom-cell-text">{text}</div>);
 
-    if (params.type === 'input' || params.type === 'select') {
-      return params.value || params.defaultValue || '';
-    }
+interface DynamicParams {
+  type: 'input' | 'select';
+  columnKey: string;
+  value?: string;
+  defaultValue?: string;
+  attributes?: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>;
+  options?: { label: string; value: string; disabled?: boolean }[];
+  onChange?: (value: string) => void;
+}
 
-    return params.value || '';
-  });
+/**
+ * Dynamic (editable) cell
+ */
+const DynamicCell = memo(
+  ({
+    fieldId,
+    params,
+    disabled,
+    tableType,
+  }: {
+    fieldId: string;
+    params: DynamicParams;
+    disabled?: boolean;
+    tableType: 'source' | 'target';
+  }) => {
+    const store = useTableMappingStore();
+    const topic = `field:${tableType}:${fieldId}:${params.columnKey}` as StoreTopic;
 
-  const { updateSourceFieldValue, updateTargetFieldValue } = tableMappingHook;
-
-  const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
-
-  useEffect(() => {
-    if (typeof params === 'string') return;
-
-    if (params.type === 'select') {
-      setLocalValue(inputRef.current?.value || '');
-
-      if (tableType === 'source' && !params.value) {
-        updateSourceFieldValue(fieldId, params.columnKey, inputRef.current?.value || '');
-      }
-
-      if (tableType === 'target' && !params.value) {
-        updateTargetFieldValue(fieldId, params.columnKey, inputRef.current?.value || '');
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof params === 'string') return;
-
-    if (params.type === 'input' || params.type === 'select') {
-      if (params.value !== localValue && document.activeElement !== inputRef.current) {
-        setLocalValue(params.defaultValue || params.value || '');
-      }
-    } else {
-      if (params.value !== localValue && document.activeElement !== inputRef.current) {
-        setLocalValue(params.value || '');
-      }
-    }
-  }, [params]);
-
-  const debouncedUpdate = useCallback(
-    debounce((value: string) => {
-      if (typeof params === 'string') return;
-
-      if (params.type === 'input' || params.type === 'select') {
-        if (params.columnKey) {
-          if (tableType === 'source') {
-            updateSourceFieldValue(fieldId, params.columnKey, value);
-          }
-          if (tableType === 'target') {
-            updateTargetFieldValue(fieldId, params.columnKey, value);
-          }
-        }
-      }
-    }, 300),
-    [fieldId, params, updateSourceFieldValue, updateTargetFieldValue, tableType],
-  );
-
-  /**
-   * handle change event target value
-   * - field type is `input` or `select`
-   */
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-
-      setLocalValue(newValue);
-      debouncedUpdate(newValue);
-
-      if (typeof params === 'string') return;
-
-      if (params.type === 'input') {
-        params.onChange?.(newValue);
-      }
-    },
-    [debouncedUpdate, params],
-  );
-
-  const handleSelectChange = useCallback(
-    (value: string) => {
-      setLocalValue(value);
-      debouncedUpdate(value);
-
-      if (typeof params === 'string') return;
-
-      if (params.type === 'select') {
-        params.onChange?.(value);
-      }
-    },
-    [debouncedUpdate, params],
-  );
-
-  if (typeof params === 'string') {
-    return <div className="custom-cell-text">{params}</div>;
-  }
-
-  if (params.type === 'input') {
-    return (
-      <div className="custom-cell-input">
-        <Input
-          value={localValue}
-          {...params.attributes}
-          ref={inputRef as React.RefObject<HTMLInputElement>}
-          onChange={handleInputChange}
-          disabled={disabled}
-        />
-      </div>
+    const subscribeField = useCallback((cb: () => void) => store.subscribe(topic, cb), [store, topic]);
+    const getFieldSnapshot = useCallback(
+      () => store.getFieldValue(tableType, fieldId, params.columnKey),
+      [store, tableType, fieldId, params.columnKey],
     );
-  }
 
-  if (params.type === 'select') {
+    const value = useSyncExternalStore(subscribeField, getFieldSnapshot);
+
+    const handleInputChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        store.setFieldValue(tableType, fieldId, params.columnKey, newValue);
+        params.onChange?.(newValue);
+      },
+      [store, tableType, fieldId, params],
+    );
+
+    const handleSelectChange = useCallback(
+      (newValue: string) => {
+        store.setFieldValue(tableType, fieldId, params.columnKey, newValue);
+        params.onChange?.(newValue);
+      },
+      [store, tableType, fieldId, params],
+    );
+
+    if (params.type === 'input') {
+      return (
+        <div className="custom-cell-input">
+          <Input value={value} {...params.attributes} onChange={handleInputChange} disabled={disabled} />
+        </div>
+      );
+    }
+
     return (
       <div className="custom-cell-select">
-        <Select defaultValue={localValue} onValueChange={handleSelectChange}>
+        <Select value={value} onValueChange={handleSelectChange}>
           <SelectTrigger disabled={disabled}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {params.options.map((option) => (
+            {params.options?.map((option) => (
               <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
                 {option.label}
               </SelectItem>
@@ -174,9 +125,14 @@ const EditableCell = memo(({ fieldId, params, disabled = true, tableType, tableM
         </Select>
       </div>
     );
-  }
+  },
+);
 
-  return <div className="custom-cell-text">{params.value}</div>;
+const EditableCell = memo(({ fieldId, params, disabled = true, tableType }: EditableCellProps) => {
+  if (typeof params === 'string') return <StaticCell text={params} />;
+  if (params.type === 'string') return <StaticCell text={params.value} />;
+
+  return <DynamicCell fieldId={fieldId} params={params as DynamicParams} disabled={disabled} tableType={tableType} />;
 });
 
 export default EditableCell;
